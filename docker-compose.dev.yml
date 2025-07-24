@@ -1,0 +1,51 @@
+# Development Docker Compose configuration
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=true
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///./data/pkm.db
+      - CHROMA_DB_PATH=./data/chroma_db
+      - RAG_STORAGE_DIR=./data/rag_storage
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/data
+    depends_on:
+      - redis
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  celery:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    environment:
+      - DEBUG=true
+      - REDIS_URL=redis://redis:6379/0
+      - DATABASE_URL=sqlite:///./data/pkm.db
+      - CHROMA_DB_PATH=./data/chroma_db
+      - RAG_STORAGE_DIR=./data/rag_storage
+    volumes:
+      - ./backend:/app
+      - backend_data:/app/data
+    depends_on:
+      - redis
+    command: celery -A app.tasks.celery_app worker --loglevel=info --reload
+
+volumes:
+  redis_data:
+  backend_data:
