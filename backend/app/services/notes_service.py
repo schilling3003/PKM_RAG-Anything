@@ -354,6 +354,298 @@ class NotesService:
             
         finally:
             db.close()
+    
+    async def create_bidirectional_links(self, note_id: str) -> Dict[str, Any]:
+        """Create bidirectional links by automatically creating notes for broken links."""
+        db = self.db_session()
+        try:
+            note = db.query(Note).filter(Note.id == note_id).first()
+            if not note:
+                raise NotFoundError(f"Note with ID {note_id} not found")
+            
+            # Get current wiki links
+            wiki_links = self._extract_wiki_links(note.content)
+            created_notes = []
+            linked_notes = []
+            
+            for link_text in wiki_links:
+                # Try to find existing note by title
+                existing_note = db.query(Note).filter(
+                    Note.title.ilike(f"%{link_text}%")
+                ).first()
+                
+                if existing_note:
+                    linked_notes.append({
+                        "id": existing_note.id,
+                        "title": existing_note.title,
+                        "link_text": link_text,
+                        "action": "linked_existing"
+                    })
+                else:
+                    # Create new note for broken link
+                    new_note = Note(
+                        title=link_text,
+                        content=f"# {link_text}\n\n_This note was automatically created from a link in [[{note.title}]]._\n\n",
+                        tags=["auto-created"],
+                        word_count=self._count_words(f"# {link_text}\n\n_This note was automatically created from a link in [[{note.title}]]._\n\n")
+                    )
+                    
+                    db.add(new_note)
+                    db.commit()
+                    db.refresh(new_note)
+                    
+                    created_notes.append({
+                        "id": new_note.id,
+                        "title": new_note.title,
+                        "link_text": link_text,
+                        "action": "created_new"
+                    })
+            
+            return {
+                "source_note_id": note_id,
+                "source_note_title": note.title,
+                "created_notes": created_notes,
+                "linked_notes": linked_notes,
+                "total_links_processed": len(wiki_links)
+            }
+            
+        except Exception as e:
+            db.rollback()
+            raise e
+        finally:
+            db.close()
+    
+    async def suggest_links(self, note_id: str, limit: int = 5) -> List[Dict[str, Any]]:
+        """Suggest potential links based on content similarity."""
+        db = self.db_session()
+        try:
+            source_note = db.query(Note).filter(Note.id == note_id).first()
+            if not source_note:
+                raise NotFoundError(f"Note with ID {note_id} not found")
+            
+            # Get all other notes
+            other_notes = db.query(Note).filter(Note.id != note_id).all()
+            
+            suggestions = []
+            source_words = set(source_note.content.lower().split())
+            source_title_words = set(source_note.title.lower().split())
+            
+            for note in other_notes:
+                # Calculate content similarity
+                note_words = set(note.content.lower().split())
+                note_title_words = set(note.title.lower().split())
+                
+                # Calculate Jaccard similarity for content
+                content_intersection = len(source_words.intersection(note_words))
+                content_union = len(source_words.union(note_words))
+                content_similarity = content_intersection / content_union if content_union > 0 else 0
+                
+                # Calculate title similarity (higher weight)
+                title_intersection = len(source_title_words.intersection(note_title_words))
+                title_union = len(source_title_words.union(note_title_words))
+                title_similarity = title_intersection / title_union if title_union > 0 else 0
+                
+                # Combined similarity score (title weighted more heavily)
+                combined_similarity = (content_similarity * 0.3) + (title_similarity * 0.7)
+                
+                # Check if already linked
+                existing_links = self._extract_wiki_links(source_note.content)
+                already_linked = any(note.title.lower() in link.lower() for link in existing_links)
+                
+                if combined_similarity > 0.1 and not already_linked:  # Minimum threshold
+                    suggestions.append({
+                        "id": note.id,
+                        "title": note.title,
+                        "similarity_score": round(combined_similarity, 3),
+                        "content_similarity": round(content_similarity, 3),
+                        "title_similarity": round(title_similarity, 3),
+                        "suggested_link_text": note.title,
+                        "reason": self._get_similarity_reason(content_similarity, title_similarity)
+                    })
+            
+            # Sort by similarity score and return top suggestions
+            suggestions.sort(key=lambda x: x["similarity_score"], reverse=True)
+            return suggestions[:limit]
+            
+        finally:
+            db.close()
+    
+    def _get_similarity_reason(self, content_sim: float, title_sim: float) -> str:
+        """Get human-readable reason for link suggestion."""
+        if title_sim > 0.5:
+            return "Similar titles"
+        elif content_sim > 0.3:
+            return "Similar content"
+        elif title_sim > 0.2:
+            return "Related titles"
+        else:
+            return "Related content"
+    
+    async def validate_all_links(self, note_id: str) -> Dict[str, Any]:
+        """Comprehensive link validation for a note."""
+        db = self.db_session()
+        try:
+            note = db.query(Note).filter(Note.id == note_id).first()
+            if not note:
+                raise NotFoundError(f"Note with ID {note_id} not found")
+            
+            # Extract all wiki links
+            wiki_links = self._extract_wiki_links(note.content)
+            
+            valid_links = []
+            broken_links = []
+            ambiguous_links = []
+            
+            for link_text in wiki_links:
+                # Find matching notes
+                matching_notes = db.query(Note).filter(
+                    Note.title.ilike(f"%{link_text}%")
+                ).all()
+                
+                if len(matching_notes) == 1:
+                    valid_links.append({
+                        "link_text": link_text,
+                        "target_note_id": matching_notes[0].id,
+                        "target_note_title": matching_notes[0].title,
+                        "match_type": "exact" if matching_notes[0].title.lower() == link_text.lower() else "partial"
+                    })
+                elif len(matching_notes) > 1:
+                    ambiguous_links.append({
+                        "link_text": link_text,
+                        "possible_matches": [
+                            {
+                                "id": match.id,
+                                "title": match.title,
+                                "similarity": self._calculate_string_similarity(link_text, match.title)
+                            }
+                            for match in matching_notes
+                        ]
+                    })
+                else:
+                    broken_links.append({
+                        "link_text": link_text,
+                        "suggestions": await self._suggest_similar_notes(link_text, db)
+                    })
+            
+            return {
+                "note_id": note_id,
+                "note_title": note.title,
+                "total_links": len(wiki_links),
+                "valid_links": valid_links,
+                "broken_links": broken_links,
+                "ambiguous_links": ambiguous_links,
+                "validation_summary": {
+                    "valid_count": len(valid_links),
+                    "broken_count": len(broken_links),
+                    "ambiguous_count": len(ambiguous_links),
+                    "health_score": len(valid_links) / len(wiki_links) if wiki_links else 1.0
+                }
+            }
+            
+        finally:
+            db.close()
+    
+    def _calculate_string_similarity(self, str1: str, str2: str) -> float:
+        """Calculate similarity between two strings using Levenshtein distance."""
+        str1, str2 = str1.lower(), str2.lower()
+        
+        if str1 == str2:
+            return 1.0
+        
+        # Simple character-based similarity
+        longer = str1 if len(str1) > len(str2) else str2
+        shorter = str2 if len(str1) > len(str2) else str1
+        
+        if len(longer) == 0:
+            return 1.0
+        
+        # Count matching characters
+        matches = sum(1 for a, b in zip(shorter, longer) if a == b)
+        return matches / len(longer)
+    
+    async def _suggest_similar_notes(self, link_text: str, db) -> List[Dict[str, Any]]:
+        """Suggest similar notes for a broken link."""
+        all_notes = db.query(Note).all()
+        suggestions = []
+        
+        for note in all_notes:
+            similarity = self._calculate_string_similarity(link_text, note.title)
+            if similarity > 0.3:  # Minimum similarity threshold
+                suggestions.append({
+                    "id": note.id,
+                    "title": note.title,
+                    "similarity": round(similarity, 3)
+                })
+        
+        suggestions.sort(key=lambda x: x["similarity"], reverse=True)
+        return suggestions[:3]  # Top 3 suggestions
+    
+    async def auto_link_content(self, note_id: str, min_similarity: float = 0.8) -> Dict[str, Any]:
+        """Automatically add links to content based on existing note titles."""
+        db = self.db_session()
+        try:
+            note = db.query(Note).filter(Note.id == note_id).first()
+            if not note:
+                raise NotFoundError(f"Note with ID {note_id} not found")
+            
+            # Get all other notes
+            other_notes = db.query(Note).filter(Note.id != note_id).all()
+            
+            updated_content = note.content
+            added_links = []
+            
+            for other_note in other_notes:
+                # Check if the note title appears in the content (case-insensitive)
+                title_lower = other_note.title.lower()
+                content_lower = updated_content.lower()
+                
+                # Find occurrences of the title in content
+                if title_lower in content_lower:
+                    # Check if it's not already a wiki link
+                    existing_links = self._extract_wiki_links(updated_content)
+                    already_linked = any(title_lower in link.lower() for link in existing_links)
+                    
+                    if not already_linked:
+                        # Replace first occurrence with wiki link
+                        # Use case-preserving replacement
+                        import re
+                        pattern = re.compile(re.escape(other_note.title), re.IGNORECASE)
+                        match = pattern.search(updated_content)
+                        
+                        if match:
+                            original_text = match.group()
+                            wiki_link = f"[[{original_text}]]"
+                            updated_content = updated_content[:match.start()] + wiki_link + updated_content[match.end():]
+                            
+                            added_links.append({
+                                "original_text": original_text,
+                                "target_note_id": other_note.id,
+                                "target_note_title": other_note.title,
+                                "position": match.start()
+                            })
+            
+            # Update the note if links were added
+            if added_links:
+                note.content = updated_content
+                note.word_count = self._count_words(updated_content)
+                note.updated_at = datetime.utcnow()
+                
+                db.commit()
+                db.refresh(note)
+            
+            return {
+                "note_id": note_id,
+                "note_title": note.title,
+                "added_links": added_links,
+                "total_links_added": len(added_links),
+                "updated_content": updated_content if added_links else None
+            }
+            
+        except Exception as e:
+            db.rollback()
+            raise e
+        finally:
+            db.close()
 
 
 # Create service instance

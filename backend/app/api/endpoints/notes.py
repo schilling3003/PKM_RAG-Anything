@@ -207,3 +207,61 @@ async def validate_note_content(note_id: str = Path(..., description="Note ID"))
         raise HTTPException(status_code=404, detail=str(e))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Validation failed: {str(e)}")
+
+
+@router.post("/{note_id}/links/create-bidirectional")
+async def create_bidirectional_links(note_id: str = Path(..., description="Note ID")):
+    """Create bidirectional links by automatically creating notes for broken links."""
+    try:
+        result = await notes_service.create_bidirectional_links(note_id)
+        return result
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create bidirectional links: {str(e)}")
+
+
+@router.get("/{note_id}/links/suggestions")
+async def get_link_suggestions(
+    note_id: str = Path(..., description="Note ID"),
+    limit: int = Query(5, ge=1, le=20, description="Maximum number of suggestions")
+):
+    """Get link suggestions based on content similarity."""
+    try:
+        suggestions = await notes_service.suggest_links(note_id, limit=limit)
+        return {
+            "note_id": note_id,
+            "suggestions": suggestions,
+            "total": len(suggestions)
+        }
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to get link suggestions: {str(e)}")
+
+
+@router.post("/{note_id}/links/validate-all")
+async def validate_all_links(note_id: str = Path(..., description="Note ID")):
+    """Comprehensive link validation for a note."""
+    try:
+        validation = await notes_service.validate_all_links(note_id)
+        return validation
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Link validation failed: {str(e)}")
+
+
+@router.post("/{note_id}/links/auto-link")
+async def auto_link_content(
+    note_id: str = Path(..., description="Note ID"),
+    min_similarity: float = Query(0.8, ge=0.1, le=1.0, description="Minimum similarity threshold")
+):
+    """Automatically add links to content based on existing note titles."""
+    try:
+        result = await notes_service.auto_link_content(note_id, min_similarity=min_similarity)
+        return result
+    except NotFoundError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Auto-linking failed: {str(e)}")
