@@ -71,6 +71,17 @@ class NotFoundError(PKMException):
         )
 
 
+class ValidationError(PKMException):
+    """Exception raised when validation fails."""
+    
+    def __init__(self, message: str, details: Optional[Dict[str, Any]] = None):
+        super().__init__(
+            message=message,
+            status_code=status.HTTP_400_BAD_REQUEST,
+            details=details
+        )
+
+
 class KnowledgeGraphError(PKMException):
     """Exception raised during knowledge graph operations."""
     

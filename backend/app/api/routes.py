@@ -129,9 +129,9 @@ async def get_task_status(task_id: str):
         }
 
 # Include individual routers
-from app.api.endpoints import documents, knowledge_graph, search, rag
+from app.api.endpoints import notes, documents, knowledge_graph, search, rag
 
-# api_router.include_router(notes.router, prefix="/notes", tags=["notes"])
+api_router.include_router(notes.router, prefix="/notes", tags=["notes"])
 api_router.include_router(documents.router, prefix="/documents", tags=["documents"])
 api_router.include_router(search.router, prefix="/search", tags=["search"])
 api_router.include_router(rag.router, prefix="/rag", tags=["rag"])
