@@ -12,12 +12,25 @@ sqlite3
 chromadb==0.4.18
 
 # RAG and AI processing
-raganything
-lightrag-hku
-mineru[core]
+raganything>=0.1.0
+lightrag-hku>=0.1.0
+mineru>=0.2.0
 
-# Image processing (for MinerU)
+# OpenAI API (user-configurable)
+openai>=1.0.0
+
+# Image processing (for MinerU and multimodal)
 Pillow>=10.0.0
+
+# PDF processing
+PyMuPDF>=1.23.0
+pdfplumber>=0.9.0
+
+# Audio processing
+mutagen>=1.47.0
+
+# Video processing (optional - requires system ffmpeg)
+# ffmpeg-python>=0.2.0
 
 # Async task processing
 celery==5.3.4
