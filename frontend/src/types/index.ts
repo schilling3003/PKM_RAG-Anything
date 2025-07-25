@@ -1,64 +1,41 @@
-// Core data types for the application
+// Re-export all types from services
+export type { Note, CreateNoteRequest, UpdateNoteRequest } from '@/services/notes'
+export type { Document, DocumentUploadResponse, ProcessingStatus } from '@/services/documents'
+export type { SearchResult, RAGResponse, SearchSuggestion } from '@/services/search'
+export type { GraphNode, GraphEdge, GraphData, RelatedContent } from '@/services/graph'
+export type { WebSocketMessage, DocumentProcessingUpdate, GraphUpdate } from '@/services/websocket'
 
-export interface Note {
-  id: string
-  title: string
-  content: string
-  createdAt: string
-  updatedAt: string
-  tags: string[]
-  links: string[]
-  metadata: Record<string, any>
+// Common UI types
+export interface SelectOption {
+  value: string
+  label: string
 }
 
-export interface Document {
-  id: string
-  filename: string
-  fileType: string
-  filePath: string
-  fileSize: number
-  processedAt: string
-  processingStatus: 'pending' | 'processing' | 'completed' | 'failed'
-  extractedText?: string
-  metadata: Record<string, any>
-  embeddingsGenerated: boolean
-}
-
-export interface SearchResult {
-  id: string
-  type: 'note' | 'document'
-  title: string
-  content: string
-  relevanceScore: number
-  highlights: string[]
-  metadata: Record<string, any>
-}
-
-export interface GraphData {
-  nodes: GraphNode[]
-  edges: GraphEdge[]
-  metadata: Record<string, any>
-}
-
-export interface GraphNode {
+export interface TabItem {
   id: string
   label: string
-  type: 'note' | 'document' | 'concept' | 'entity'
-  properties: Record<string, any>
+  content: React.ReactNode
 }
 
-export interface GraphEdge {
-  source: string
-  target: string
-  relationship: string
-  weight: number
-  properties: Record<string, any>
+// Application state types
+export interface AppState {
+  currentNote?: string
+  currentDocument?: string
+  sidebarCollapsed: boolean
+  theme: 'light' | 'dark' | 'system'
 }
 
-export interface ProcessingStatus {
-  documentId: string
-  status: 'queued' | 'processing' | 'completed' | 'failed'
+// Error types
+export interface ApiError {
+  message: string
+  status?: number
+  code?: string
+}
+
+// File upload types
+export interface FileUploadProgress {
+  file: File
   progress: number
-  currentStep: string
+  status: 'uploading' | 'processing' | 'completed' | 'error'
   error?: string
 }
