@@ -1,5 +1,5 @@
 import { Routes, Route } from 'react-router-dom'
-import { MainLayout } from './components/layout/main-layout'
+import { ResponsiveLayout } from './components/layout/responsive-layout'
 import { HomePage } from './pages/home'
 import { NotesPage } from './pages/notes'
 import { DocumentsPage } from './pages/documents'
@@ -9,7 +9,7 @@ import { GraphPage } from './pages/graph'
 export function AppRoutes() {
   return (
     <Routes>
-      <Route path="/" element={<MainLayout />}>
+      <Route path="/" element={<ResponsiveLayout />}>
         <Route index element={<HomePage />} />
         <Route path="notes" element={<NotesPage />} />
         <Route path="notes/:noteId" element={<NotesPage />} />

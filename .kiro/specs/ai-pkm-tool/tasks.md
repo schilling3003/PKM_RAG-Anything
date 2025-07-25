@@ -227,7 +227,10 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: initialize React app with TypeScript, Tailwind, and ShadCN UI"
     - _Requirements: 7.3, 7.4_
 
-  - [ ] 7.2 Create main layout and navigation components
+  - [x] 7.2 Create main layout and navigation components
+
+
+
     - Build responsive sidebar with note navigation
     - Implement main header with search and action buttons
     - Create resizable panels for multi-pane layout
@@ -235,7 +238,11 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: create main layout with responsive sidebar and navigation"
     - _Requirements: 1.1, 1.4_
 
-  - [ ] 7.3 Implement markdown editor with real-time preview
+  - [x] 7.3 Implement markdown editor with real-time preview
+
+
+
+
     - Create split-pane markdown editor with syntax highlighting
     - Build real-time preview with markdown rendering
     - Implement auto-save functionality with debouncing
@@ -395,3 +402,12 @@ This implementation plan includes regular commits throughout development to main
     - Create video tutorials for key features
     - Commit: "docs: create comprehensive user documentation and guides"
     - _Requirements: 5.2_
+##
+ Cleanup Tasks
+
+- [ ] Clean up temp_lightrag folder
+  - Remove the temp_lightrag Git repository from the project root
+  - This folder contains a cloned LightRAG repository used for reference during development
+  - LightRAG integration should be done via proper Python package installation (pip install lightrag-hku)
+  - Either delete the folder or move it outside the project to avoid Git submodule issues
+  - _Note: This was causing Git warnings during commits due to embedded repository_
