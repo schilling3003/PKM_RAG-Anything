@@ -250,7 +250,9 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: implement markdown editor with real-time preview and auto-save"
     - _Requirements: 1.2, 1.3_
 
-- [-] 8. Build document and PDF viewing capabilities
+- [x] 8. Build document and PDF viewing capabilities
+
+
 
 
 
@@ -265,7 +267,8 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: create document management interface with upload and status tracking"
     - _Requirements: 2.1, 2.2, 5.1_
 
-  - [-] 8.2 Implement PDF viewer component
+  - [x] 8.2 Implement PDF viewer component
+
 
     - Create embedded PDF viewer with navigation controls
     - Build page-by-page navigation and zoom functionality

@@ -18,6 +18,11 @@ This document provides an overview of the current implementation status of the A
   - Document list with filtering, sorting, and search
   - Metadata editing with tags and descriptions
   - Real-time processing status indicators
+- **PDF Viewer**: Full-featured PDF viewing with advanced capabilities
+  - Page navigation with zoom and rotation controls
+  - Text search with result highlighting and navigation
+  - Annotation system (notes, highlights, text annotations)
+  - Fullscreen mode and responsive design
 - **Notes Interface**: Basic markdown editor with CRUD operations
 - **Responsive Layout**: ShadCN UI components with Tailwind CSS
 - **API Integration**: TanStack Query for server state management
@@ -34,11 +39,6 @@ This document provides an overview of the current implementation status of the A
 - **Backend**: Complete graph API with LightRAG integration
 - **Frontend**: Placeholder component exists, D3.js visualization needed
 - **Status**: Backend ready, frontend visualization pending
-
-### PDF Viewer (Task 8.2)
-- **Backend**: PDF processing implemented
-- **Frontend**: View action exists but no viewer component
-- **Status**: Backend ready, frontend viewer component needed
 
 ## Planned Features 📋
 
@@ -72,20 +72,20 @@ This document provides an overview of the current implementation status of the A
 
 ## Next Priority Tasks
 
-1. **PDF Viewer Component** (High Priority)
-   - Implement embedded PDF viewer with react-pdf or similar
-   - Add navigation controls and search functionality
-   - Connect to existing document view action
-
-2. **Knowledge Graph Visualization** (High Priority)
+1. **Knowledge Graph Visualization** (High Priority)
    - Create D3.js-based interactive graph component
    - Implement node filtering and clustering
    - Add graph exploration features
 
-3. **Search Interface** (Medium Priority)
+2. **Search Interface** (High Priority)
    - Build unified search component
    - Implement result display with citations
    - Add advanced filtering options
+
+3. **Real-time Updates** (Medium Priority)
+   - WebSocket integration for live updates
+   - Real-time collaboration indicators
+   - Live search result updates
 
 ## Development Notes
 

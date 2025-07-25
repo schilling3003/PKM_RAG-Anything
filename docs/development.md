@@ -267,6 +267,7 @@ docker-compose -f docker-compose.dev.yml restart redis
 - Document metadata editing and display
 - Processing status indicators with real-time updates
 - Notes management interface
+- PDF viewer with navigation, search, zoom, rotation, and annotation capabilities
 - Responsive layout with ShadCN UI components
 
 ### 🚧 In Progress
@@ -276,27 +277,22 @@ docker-compose -f docker-compose.dev.yml restart redis
 - Frontend D3.js visualization component needed
 - Interactive graph exploration features planned
 
-**PDF Viewer:**
-- Backend PDF processing is implemented
-- Frontend PDF viewer component needed
-- Search and navigation features planned
-
 ### 📋 Next Steps
 
-1. **PDF Viewer Implementation** (Task 8.2)
-   - Create embedded PDF viewer component
-   - Add navigation and search capabilities
-   - Implement annotation features
-
-2. **Knowledge Graph Visualization** (Task 9.1-9.2)
+1. **Knowledge Graph Visualization** (Task 9.1-9.2)
    - Build D3.js-based interactive graph
    - Add filtering and clustering features
    - Create node detail panels
 
-3. **Search Interface** (Task 10.1-10.2)
+2. **Search Interface** (Task 10.1-10.2)
    - Unified search interface with mode selection
    - Advanced filtering and result display
    - RAG answer presentation with citations
+
+3. **Real-time Updates** (Task 11.1-11.2)
+   - WebSocket integration for live updates
+   - Real-time processing status updates
+   - Collaborative editing indicators
 
 ## Contributing
 

@@ -10,13 +10,13 @@ A modern, self-hosted Personal Knowledge Management (PKM) system that combines t
 - **AI-Powered Search**: Semantic search and RAG-based question answering with multiple modes
 - **Notes System**: Markdown editor with wiki-style linking and CRUD operations
 - **Knowledge Graph Backend**: LightRAG-powered graph construction and querying
+- **PDF Viewer**: Integrated PDF viewing with navigation, search, zoom, and annotation capabilities
 - **Real-time Processing**: Background document processing with live status updates
 - **Easy Deployment**: Docker-based deployment for single-user or small team use
 - **Privacy-Focused**: All processing occurs locally or through user-configured services
 
 ### 🚧 In Development
 - **Knowledge Graph Visualization**: Interactive D3.js-based graph visualization (backend ready)
-- **PDF Viewer**: Integrated PDF viewing with search and navigation
 - **Advanced Search Interface**: Unified search with filtering and result display
 
 ### 📋 Planned
@@ -100,6 +100,7 @@ See [Development Guide](docs/development.md) for detailed setup instructions.
 
 - [Development Guide](docs/development.md) - Setup and development workflow
 - [Implementation Status](docs/implementation-status.md) - Current feature status and roadmap
+- [PDF Viewer Guide](docs/pdf-viewer.md) - PDF viewing and annotation features
 - [User Guide](docs/user-guide.md) - How to use the application
 - [API Documentation](docs/api.md) - Backend API reference
 - [Deployment Guide](docs/deployment.md) - Production deployment
