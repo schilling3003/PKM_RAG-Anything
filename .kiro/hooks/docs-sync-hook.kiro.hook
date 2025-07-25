@@ -1,0 +1,26 @@
+{
+  "enabled": true,
+  "name": "Documentation Sync",
+  "description": "Monitors all source files in the repository and triggers documentation updates in README.md or docs/ folder when changes are detected",
+  "version": "1",
+  "when": {
+    "type": "fileEdited",
+    "patterns": [
+      "backend/**/*.py",
+      "frontend/src/**/*.ts",
+      "frontend/src/**/*.tsx",
+      "frontend/**/*.json",
+      "backend/requirements.txt",
+      "docker-compose.yml",
+      "docker-compose.dev.yml",
+      "*.md",
+      "frontend/package.json",
+      "backend/Dockerfile",
+      "frontend/Dockerfile"
+    ]
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Source files have been modified in this AI-focused Personal Knowledge Management tool. Please review the changes and update the documentation accordingly. Focus on:\n\n1. Update README.md if the changes affect:\n   - Installation or setup procedures\n   - Core functionality or features\n   - API changes or new endpoints\n   - Architecture or technology stack changes\n\n2. Update files in the docs/ folder if the changes involve:\n   - Development workflows or processes\n   - Technical implementation details\n   - New features requiring detailed documentation\n\nThe project uses FastAPI backend with Python, React frontend with TypeScript, and includes multimodal document processing, AI-powered search, and knowledge graph capabilities. Ensure documentation reflects current functionality and maintains consistency with the existing documentation style."
+  }
+}

@@ -85,21 +85,37 @@ ai-pkm-tool/
 ├── backend/                 # FastAPI backend
 │   ├── app/
 │   │   ├── api/            # API endpoints
+│   │   │   └── endpoints/  # Individual endpoint modules
 │   │   ├── core/           # Core configuration
-│   │   ├── models/         # Data models
-│   │   ├── services/       # Business logic
-│   │   └── tasks/          # Celery tasks
+│   │   ├── models/         # Data models (SQLAlchemy & Pydantic)
+│   │   ├── services/       # Business logic services
+│   │   │   ├── documents_service.py    # Document processing
+│   │   │   ├── rag_service.py          # RAG functionality
+│   │   │   ├── semantic_search.py      # Search capabilities
+│   │   │   ├── knowledge_graph.py      # Graph operations
+│   │   │   └── notes_service.py        # Notes management
+│   │   └── tasks/          # Celery background tasks
 │   ├── tests/              # Backend tests
+│   ├── data/               # Local data storage
 │   └── requirements.txt    # Python dependencies
 ├── frontend/               # React frontend
 │   ├── src/
 │   │   ├── components/     # React components
-│   │   ├── hooks/          # Custom hooks
+│   │   │   ├── documents/  # Document management components
+│   │   │   ├── notes/      # Note editing components
+│   │   │   ├── search/     # Search interface components
+│   │   │   └── ui/         # ShadCN UI components
+│   │   ├── hooks/          # Custom React hooks
 │   │   ├── pages/          # Page components
-│   │   ├── services/       # API services
-│   │   └── types/          # TypeScript types
+│   │   ├── services/       # API service layer
+│   │   └── types/          # TypeScript type definitions
 │   └── package.json        # Node dependencies
-└── docs/                   # Documentation
+├── data/                   # Persistent data storage
+│   ├── pkm.db             # SQLite database
+│   ├── chroma_db/         # ChromaDB vector storage
+│   ├── rag_storage/       # LightRAG knowledge graph data
+│   └── uploads/           # User uploaded files
+└── docs/                  # Documentation
 ```
 
 ## Development Workflow
@@ -232,6 +248,55 @@ docker-compose -f docker-compose.dev.yml restart redis
 2. **Enable hot reloading** in development
 3. **Use Redis caching** for frequently accessed data
 4. **Monitor memory usage** during document processing
+
+## Current Implementation Status
+
+### ✅ Completed Features
+
+**Backend Services:**
+- Document processing with RAG-Anything and MinerU 2.0
+- Semantic search with ChromaDB vector storage
+- RAG-based question answering with multiple modes
+- Knowledge graph construction with LightRAG
+- Notes CRUD operations with wiki-style linking
+- Asynchronous task processing with Celery
+
+**Frontend Components:**
+- Document upload with drag-and-drop support
+- Document list with filtering and sorting
+- Document metadata editing and display
+- Processing status indicators with real-time updates
+- Notes management interface
+- Responsive layout with ShadCN UI components
+
+### 🚧 In Progress
+
+**Knowledge Graph Visualization:**
+- Backend graph API is complete
+- Frontend D3.js visualization component needed
+- Interactive graph exploration features planned
+
+**PDF Viewer:**
+- Backend PDF processing is implemented
+- Frontend PDF viewer component needed
+- Search and navigation features planned
+
+### 📋 Next Steps
+
+1. **PDF Viewer Implementation** (Task 8.2)
+   - Create embedded PDF viewer component
+   - Add navigation and search capabilities
+   - Implement annotation features
+
+2. **Knowledge Graph Visualization** (Task 9.1-9.2)
+   - Build D3.js-based interactive graph
+   - Add filtering and clustering features
+   - Create node detail panels
+
+3. **Search Interface** (Task 10.1-10.2)
+   - Unified search interface with mode selection
+   - Advanced filtering and result display
+   - RAG answer presentation with citations
 
 ## Contributing
 

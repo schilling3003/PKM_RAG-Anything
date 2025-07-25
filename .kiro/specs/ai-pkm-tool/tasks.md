@@ -206,7 +206,7 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: add wiki-style linking with bidirectional links and backtracking"
     - _Requirements: 1.5_
 
-- [ ] 7. Build React frontend with ShadCN UI components
+- [x] 7. Build React frontend with ShadCN UI components
 
 
 
@@ -250,16 +250,23 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: implement markdown editor with real-time preview and auto-save"
     - _Requirements: 1.2, 1.3_
 
-- [ ] 8. Build document and PDF viewing capabilities
-  - [ ] 8.1 Create document management interface
-    - Build document upload component with drag-and-drop support
-    - Implement document list with filtering and sorting
-    - Create document metadata display and editing
-    - Build document processing status indicators with progress bars
+- [-] 8. Build document and PDF viewing capabilities
+
+
+
+  - [x] 8.1 Create document management interface
+
+
+
+    - [x] Build document upload component with drag-and-drop support
+    - [x] Implement document list with filtering and sorting
+    - [x] Create document metadata display and editing
+    - [x] Build document processing status indicators with progress bars
     - Commit: "feat: create document management interface with upload and status tracking"
     - _Requirements: 2.1, 2.2, 5.1_
 
-  - [ ] 8.2 Implement PDF viewer component
+  - [-] 8.2 Implement PDF viewer component
+
     - Create embedded PDF viewer with navigation controls
     - Build page-by-page navigation and zoom functionality
     - Implement PDF search and text highlighting
@@ -267,7 +274,11 @@ This implementation plan includes regular commits throughout development to main
     - Commit: "feat: implement PDF viewer with navigation and search capabilities"
     - _Requirements: 2.1.1, 2.1.2, 2.1.3, 2.1.4, 2.1.5_
 
-- [ ] 9. Create knowledge graph visualization
+
+
+- [-] 9. Create knowledge graph visualization
+
+
   - [ ] 9.1 Build interactive graph visualization
     - Implement D3.js-based knowledge graph renderer
     - Create node and edge styling based on content types

@@ -4,13 +4,25 @@ A modern, self-hosted Personal Knowledge Management (PKM) system that combines t
 
 ## Features
 
-- **Obsidian-like Interface**: Familiar markdown editor with wiki-style linking
+### ✅ Implemented
+- **Document Management**: Complete upload, processing, and metadata management interface
 - **Multimodal Document Processing**: Support for text, images, PDFs, audio, and video using RAG-Anything with MinerU 2.0
-- **AI-Powered Search**: Semantic search and RAG-based question answering
-- **Knowledge Graph**: Interactive visualization of relationships between notes and documents
-- **PDF Viewer**: Integrated PDF viewing with search and navigation
+- **AI-Powered Search**: Semantic search and RAG-based question answering with multiple modes
+- **Notes System**: Markdown editor with wiki-style linking and CRUD operations
+- **Knowledge Graph Backend**: LightRAG-powered graph construction and querying
+- **Real-time Processing**: Background document processing with live status updates
 - **Easy Deployment**: Docker-based deployment for single-user or small team use
 - **Privacy-Focused**: All processing occurs locally or through user-configured services
+
+### 🚧 In Development
+- **Knowledge Graph Visualization**: Interactive D3.js-based graph visualization (backend ready)
+- **PDF Viewer**: Integrated PDF viewing with search and navigation
+- **Advanced Search Interface**: Unified search with filtering and result display
+
+### 📋 Planned
+- **WebSocket Integration**: Real-time collaborative features
+- **Performance Optimizations**: Caching and query optimization
+- **Comprehensive Testing**: Full test coverage for all components
 
 ## Architecture
 
@@ -86,10 +98,12 @@ See [Development Guide](docs/development.md) for detailed setup instructions.
 
 ## Documentation
 
-- [User Guide](docs/user-guide.md)
-- [API Documentation](docs/api.md)
-- [Deployment Guide](docs/deployment.md)
-- [Contributing](docs/contributing.md)
+- [Development Guide](docs/development.md) - Setup and development workflow
+- [Implementation Status](docs/implementation-status.md) - Current feature status and roadmap
+- [User Guide](docs/user-guide.md) - How to use the application
+- [API Documentation](docs/api.md) - Backend API reference
+- [Deployment Guide](docs/deployment.md) - Production deployment
+- [Contributing](docs/contributing.md) - How to contribute
 
 ## License
 
