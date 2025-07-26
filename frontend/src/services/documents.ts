@@ -27,21 +27,45 @@ export interface ProcessingStatus {
   error_message?: string
 }
 
+// Development mode flag - set to true to use mock data
+const USE_MOCK_DATA = false
+
 export const documentsService = {
   // Get all documents
   async getDocuments(): Promise<Document[]> {
+    if (USE_MOCK_DATA) {
+      const { mockDocuments } = await import('./mock-data')
+      return new Promise(resolve => setTimeout(() => resolve(mockDocuments), 500))
+    }
     const response = await api.get('/documents')
-    return response.data
+    // Backend returns { documents: Document[], total: number, message: string }
+    return response.data.documents || []
   },
 
   // Get a specific document
   async getDocument(id: string): Promise<Document> {
+    if (USE_MOCK_DATA) {
+      const { mockDocuments } = await import('./mock-data')
+      const document = mockDocuments.find(doc => doc.id === id)
+      if (!document) throw new Error('Document not found')
+      return new Promise(resolve => setTimeout(() => resolve(document), 300))
+    }
     const response = await api.get(`/documents/${id}`)
     return response.data
   },
 
   // Upload a document
   async uploadDocument(file: File): Promise<DocumentUploadResponse> {
+    if (USE_MOCK_DATA) {
+      return new Promise(resolve => 
+        setTimeout(() => resolve({
+          document_id: Math.random().toString(36).substr(2, 9),
+          task_id: Math.random().toString(36).substr(2, 9),
+          status: 'queued',
+          message: `File "${file.name}" uploaded successfully`
+        }), 1000)
+      )
+    }
     const formData = new FormData()
     formData.append('file', file)
     
@@ -55,6 +79,13 @@ export const documentsService = {
 
   // Get document processing status
   async getProcessingStatus(documentId: string): Promise<ProcessingStatus> {
+    if (USE_MOCK_DATA) {
+      const { mockProcessingStatus } = await import('./mock-data')
+      return new Promise(resolve => setTimeout(() => resolve({
+        ...mockProcessingStatus,
+        error_message: mockProcessingStatus.error_message || undefined
+      }), 200))
+    }
     const response = await api.get(`/documents/${documentId}/status`)
     return response.data
   },

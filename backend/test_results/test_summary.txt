@@ -1,0 +1,15 @@
+AI PKM Tool - Comprehensive Test Suite Results
+==================================================
+
+Execution Time: 3.39 seconds
+Categories Run: 1
+Successful Categories: 0
+Failed Categories: 1
+
+Total Tests: 0
+Passed Tests: 0
+Failed Tests: 0
+Success Rate: 0.0%
+
+Category Results:
+--------------------

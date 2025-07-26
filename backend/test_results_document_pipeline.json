@@ -1,0 +1,284 @@
+{
+  "success": false,
+  "total_time": 6.51382040977478,
+  "test_results": {
+    "service_health": {
+      "all_healthy": true,
+      "services": {
+        "redis": {
+          "status": "healthy",
+          "details": {
+            "service": "redis",
+            "status": "healthy",
+            "details": {
+              "ping": true,
+              "version": "7.4.5",
+              "connected_clients": 18,
+              "used_memory_human": "1.67M",
+              "uptime_in_seconds": 2450,
+              "test_operations": "passed"
+            },
+            "timestamp": "2025-07-26T20:31:00.945582",
+            "response_time_ms": 2.149
+          }
+        },
+        "celery": {
+          "status": "healthy",
+          "details": {
+            "service": "celery",
+            "status": "degraded",
+            "details": {
+              "active_workers": 1,
+              "worker_names": [
+                "celery@41dad21779c2"
+              ],
+              "total_registered_tasks": 7,
+              "task_test": "failed",
+              "task_test_error": "'app.tasks.maintenance.ping_task'",
+              "stats": {
+                "celery@41dad21779c2": {
+                  "total": {},
+                  "pid": 1,
+                  "clock": "2791",
+                  "uptime": 2451,
+                  "pool": {
+                    "implementation": "celery.concurrency.prefork:TaskPool",
+                    "max-concurrency": 16,
+                    "processes": [
+                      23,
+                      24,
+                      25,
+                      26,
+                      27,
+                      28,
+                      29,
+                      30,
+                      31,
+                      32,
+                      33,
+                      34,
+                      35,
+                      36,
+                      37,
+                      38
+                    ],
+                    "max-tasks-per-child": 1000,
+                    "put-guarded-by-semaphore": false,
+                    "timeouts": [
+                      300,
+                      600
+                    ],
+                    "writes": {
+                      "total": 0,
+                      "avg": "0.00",
+                      "all": "",
+                      "raw": "",
+                      "strategy": "fair",
+                      "inqueues": {
+                        "total": 16,
+                        "active": 0
+                      }
+                    }
+                  },
+                  "broker": {
+                    "hostname": "redis",
+                    "userid": null,
+                    "virtual_host": "0",
+                    "port": 6379,
+                    "insist": false,
+                    "ssl": false,
+                    "transport": "redis",
+                    "connect_timeout": 4,
+                    "transport_options": {},
+                    "login_method": null,
+                    "uri_prefix": null,
+                    "heartbeat": 120.0,
+                    "failover_strategy": "round-robin",
+                    "alternates": []
+                  },
+                  "prefetch_count": 16,
+                  "rusage": {
+                    "utime": 2.480713,
+                    "stime": 2.530328,
+                    "maxrss": 144388,
+                    "ixrss": 0,
+                    "idrss": 0,
+                    "isrss": 0,
+                    "minflt": 228076,
+                    "majflt": 699,
+                    "nswap": 0,
+                    "inblock": 204632,
+                    "oublock": 16,
+                    "msgsnd": 0,
+                    "msgrcv": 0,
+                    "nsignals": 0,
+                    "nvcsw": 10547,
+                    "nivcsw": 60
+                  }
+                }
+              }
+            },
+            "timestamp": "2025-07-26T20:31:04.073788",
+            "response_time_ms": 3114.3109999999997
+          }
+        },
+        "lightrag": {
+          "status": "healthy",
+          "details": {
+            "service": "lightrag",
+            "status": "healthy",
+            "details": {
+              "initialized": true,
+              "working_dir_exists": true,
+              "storage_info": {
+                "working_dir": "./data/rag_storage",
+                "exists": true,
+                "files": [],
+                "total_size": 0
+              },
+              "openai_service": {
+                "configured": false,
+                "available": false
+              },
+              "status": "healthy"
+            },
+            "timestamp": "2025-07-26T20:31:04.086407",
+            "response_time_ms": 1.078
+          }
+        },
+        "raganything": {
+          "status": "healthy",
+          "details": {
+            "service": "raganything_mineru",
+            "status": "healthy",
+            "details": {
+              "raganything_version": "1.2.5",
+              "mineru_available": true,
+              "mineru_error": null,
+              "mineru_test_passed": true,
+              "mineru_test_error": null,
+              "cuda_available": false,
+              "cuda_version": null,
+              "device_setting": "cpu",
+              "config_file_exists": false,
+              "config_file_path": "backend/magic-pdf.json"
+            },
+            "timestamp": "2025-07-26T20:31:05.281514",
+            "response_time_ms": 1174.7479999999998
+          }
+        },
+        "openai": {
+          "status": "healthy",
+          "details": {
+            "service": "openai",
+            "status": "degraded",
+            "details": {
+              "service": "openai",
+              "configured": false,
+              "available": false,
+              "base_url": null,
+              "models": {
+                "llm": "gpt-4o-mini",
+                "vision": "gpt-4o",
+                "embedding": "text-embedding-3-large"
+              },
+              "last_test": null,
+              "fallback_enabled": true
+            },
+            "timestamp": "2025-07-26T20:31:05.301706",
+            "response_time_ms": 0.008
+          }
+        },
+        "storage": {
+          "status": "healthy",
+          "details": {
+            "service": "storage",
+            "status": "healthy",
+            "details": {
+              "upload_dir": {
+                "path": "./data/uploads",
+                "exists": true,
+                "writable": true,
+                "write_test_passed": true,
+                "total_size_bytes": 0,
+                "file_count": 0
+              },
+              "processed_dir": {
+                "path": "./data/processed",
+                "exists": true,
+                "writable": true,
+                "write_test_passed": true,
+                "total_size_bytes": 0,
+                "file_count": 0
+              },
+              "rag_storage_dir": {
+                "path": "./data/rag_storage",
+                "exists": true,
+                "writable": true,
+                "write_test_passed": true,
+                "total_size_bytes": 0,
+                "file_count": 0
+              },
+              "chroma_db_path": {
+                "path": "./data/chroma_db",
+                "exists": true,
+                "writable": true,
+                "write_test_passed": true,
+                "total_size_bytes": 147456,
+                "file_count": 1
+              },
+              "database": {
+                "path": "./data/pkm.db",
+                "exists": true,
+                "directory_writable": true,
+                "size_bytes": 4096
+              }
+            },
+            "timestamp": "2025-07-26T20:31:05.318876",
+            "response_time_ms": 0.474
+          }
+        }
+      }
+    },
+    "multimodal_processing": {
+      "success": false,
+      "processed_file_types": [],
+      "total_file_types": 3,
+      "results": {
+        ".txt": {
+          "success": false,
+          "error": "upload_failed",
+          "details": {
+            "success": false,
+            "error": "HTTP 500",
+            "details": "{\"error\":{\"error_code\":\"INTERNAL_500\",\"message\":\"{'error': 'Upload failed due to unexpected error', 'message': \\\"'safe_filename' is an invalid keyword argument for Document\\\", 'context': {'document_id': '44b7bc87-ef1d-49d1-9696-2a34210b5d14', 'filename': 'test_document.txt', 'content_type': 'application/octet-stream', 'endpoint': 'upload_document', 'file_size': 665, 'file_path': 'data/uploads/44b7bc87-ef1d-49d1-9696-2a34210b5d14_test_document.txt'}, 'suggestions': ['Try uploading the file again', 'Check if the file is corrupted', 'Contact support if the problem persists']}\",\"user_message\":\"An internal server error occurred.\",\"category\":\"internal\",\"severity\":\"high\",\"status_code\":500,\"timestamp\":\"2025-07-26T20:31:07.379470\",\"details\":{},\"recovery_suggestions\":[]},\"request_id\":\"8e530d67-3091-4787-9b4c-b978c6bd9347\",\"timestamp\":\"2025-07-26T20:31:07.379470\"}"
+          }
+        },
+        ".md": {
+          "success": false,
+          "error": "upload_failed",
+          "details": {
+            "success": false,
+            "error": "HTTP 500",
+            "details": "{\"error\":{\"error_code\":\"INTERNAL_500\",\"message\":\"{'error': 'Upload failed due to unexpected error', 'message': \\\"'safe_filename' is an invalid keyword argument for Document\\\", 'context': {'document_id': 'ea11694a-593b-49b4-8690-a1bf327ac178', 'filename': 'test_notes.md', 'content_type': 'application/octet-stream', 'endpoint': 'upload_document', 'file_size': 747, 'file_path': 'data/uploads/ea11694a-593b-49b4-8690-a1bf327ac178_test_notes.md'}, 'suggestions': ['Try uploading the file again', 'Check if the file is corrupted', 'Contact support if the problem persists']}\",\"user_message\":\"An internal server error occurred.\",\"category\":\"internal\",\"severity\":\"high\",\"status_code\":500,\"timestamp\":\"2025-07-26T20:31:07.400539\",\"details\":{},\"recovery_suggestions\":[]},\"request_id\":\"aff2768b-0736-49cd-93d9-75143822d02a\",\"timestamp\":\"2025-07-26T20:31:07.400539\"}"
+          }
+        },
+        ".json": {
+          "success": false,
+          "error": "upload_failed",
+          "details": {
+            "success": false,
+            "error": "HTTP 500",
+            "details": "{\"error\":{\"error_code\":\"INTERNAL_500\",\"message\":\"{'error': 'Upload failed due to unexpected error', 'message': \\\"'safe_filename' is an invalid keyword argument for Document\\\", 'context': {'document_id': '818f154a-acab-4ecb-94f1-ca4f8a68d4bc', 'filename': 'test_data.json', 'content_type': 'application/octet-stream', 'endpoint': 'upload_document', 'file_size': 958, 'file_path': 'data/uploads/818f154a-acab-4ecb-94f1-ca4f8a68d4bc_test_data.json'}, 'suggestions': ['Try uploading the file again', 'Check if the file is corrupted', 'Contact support if the problem persists']}\",\"user_message\":\"An internal server error occurred.\",\"category\":\"internal\",\"severity\":\"high\",\"status_code\":500,\"timestamp\":\"2025-07-26T20:31:07.425779\",\"details\":{},\"recovery_suggestions\":[]},\"request_id\":\"1cab3908-d5ef-4330-89ce-aa3e926e49e4\",\"timestamp\":\"2025-07-26T20:31:07.425779\"}"
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "services_healthy": true,
+    "multimodal_processing": false,
+    "semantic_search": false,
+    "knowledge_graph": false
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "execution_summary": {
+    "start_time": 1753566369.439304,
+    "end_time": 1753566372.8308063,
+    "total_duration": 3.3915021419525146,
+    "categories_run": 1,
+    "successful_categories": 0,
+    "failed_categories": 1
+  },
+  "test_summary": {
+    "total_tests": 0,
+    "passed_tests": 0,
+    "failed_tests": 0,
+    "success_rate": 0
+  },
+  "category_results": {
+    "unit": {
+      "category": "unit",
+      "success": false,
+      "duration": 3.0285050868988037,
+      "stdout": "2025-07-26 17:46:10 [info     ] Service health check completed error=RAG-Anything not installed response_time=0.0 service=raganything status=unhealthy\n2025-07-26 17:46:10 [warning  ] RAG-Anything service not available, using fallback mode\n2025-07-26 17:46:12 [info     ] RAG service initialized with LightRAG support\n",
+      "stderr": "C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\_pytest\\config\\__init__.py:331: PluggyTeardownRaisedWarning: A plugin raised an exception during an old-style hookwrapper teardown.\nPlugin: helpconfig, Hook: pytest_cmdline_parse\nUsageError: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --html=test_results/unit_report.html --self-contained-html\n  inifile: C:\\Users\\User\\CascadeProjects\\PKM_RAG-Anything\\backend\\pytest.ini\n  rootdir: C:\\Users\\User\\CascadeProjects\\PKM_RAG-Anything\\backend\nFor more information see https://pluggy.readthedocs.io/en/stable/api_reference.html#pluggy.PluggyTeardownRaisedWarning\n  config = pluginmanager.hook.pytest_cmdline_parse(\nINFO:nano-vectordb:Init {'embedding_dim': 3072, 'metric': 'cosine', 'storage_file': './data/rag_storage\\\\knowledge_graph\\\\vdb_entities.json'} 0 data\nINFO:nano-vectordb:Init {'embedding_dim': 3072, 'metric': 'cosine', 'storage_file': './data/rag_storage\\\\knowledge_graph\\\\vdb_relationships.json'} 0 data\nINFO:nano-vectordb:Init {'embedding_dim': 3072, 'metric': 'cosine', 'storage_file': './data/rag_storage\\\\knowledge_graph\\\\vdb_chunks.json'} 0 data\nRerank is enabled but no rerank_model_func provided. Reranking will be skipped.\nINFO:app.services.knowledge_graph:LightRAG initialized successfully\nINFO:app.core.vector_db:ChromaDB initialized at ./data/chroma_db\nINFO:app.services.semantic_search:LightRAG query capabilities initialized\nERROR: usage: __main__.py [options] [file_or_dir] [file_or_dir] [...]\n__main__.py: error: unrecognized arguments: --html=test_results/unit_report.html --self-contained-html\n  inifile: C:\\Users\\User\\CascadeProjects\\PKM_RAG-Anything\\backend\\pytest.ini\n  rootdir: C:\\Users\\User\\CascadeProjects\\PKM_RAG-Anything\\backend\n\n--- Logging Error in ConsoleHandler ---\nError flushing stream during close\n--- Traceback ---\nTraceback (most recent call last):\n  File \"C:\\Users\\User\\AppData\\Local\\Programs\\Python\\Python312\\Lib\\site-packages\\ascii_colors\\__init__.py\", line 998, in close\n    self.stream.flush()\nValueError: I/O operation on closed file.\n--- End Logging Error ---\n",
+      "return_code": 4,
+      "command": "python -m pytest tests/test_health_endpoints.py -v -m not requires_services --junit-xml=test_results/unit_results.xml --html=test_results/unit_report.html --self-contained-html"
+    }
+  },
+  "output_files": {
+    "summary_report": "test_results\\test_summary.json",
+    "coverage_html": "test_results\\coverage_html\\index.html",
+    "test_reports": [
+      "test_results\\unit_report.html"
+    ]
+  },
+  "requirements_coverage": {
+    "1.1": "Document upload functionality - Tested in integration tests",
+    "1.3": "Document processing pipeline - Tested in integration and load tests",
+    "2.2": "Celery task processing - Tested in health checks and error handling",
+    "2.4": "Error handling and recovery - Tested in error handling tests",
+    "5.5": "AI processing performance - Tested in load tests",
+    "6.5": "Knowledge graph performance - Tested in load tests",
+    "7.1-7.5": "Service health checks - Tested in health endpoint tests",
+    "8.4": "Health check endpoints - Tested in unit tests"
+  }
+}

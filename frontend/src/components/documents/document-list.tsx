@@ -57,14 +57,16 @@ export function DocumentList({ onDocumentSelect, onDocumentView }: DocumentListP
   const [sortDirection, setSortDirection] = useState<SortDirection>('desc')
   const [filterStatus, setFilterStatus] = useState<FilterStatus>('all')
 
-  const { data: documents = [], isLoading, refetch } = useQuery({
+  const { data: documents, isLoading, refetch } = useQuery({
     queryKey: ['documents'],
     queryFn: documentsService.getDocuments,
     refetchInterval: 5000, // Refetch every 5 seconds to update processing status
   })
 
   const filteredAndSortedDocuments = useMemo(() => {
-    let filtered = documents
+    // Ensure we have an array to work with
+    const documentsArray = Array.isArray(documents) ? documents : []
+    let filtered = documentsArray
 
     // Apply search filter
     if (searchQuery) {
@@ -229,7 +231,7 @@ export function DocumentList({ onDocumentSelect, onDocumentView }: DocumentListP
       <CardContent>
         {filteredAndSortedDocuments.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
-            {documents.length === 0 ? (
+            {(Array.isArray(documents) ? documents : []).length === 0 ? (
               <div>
                 <File className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>No documents uploaded yet</p>

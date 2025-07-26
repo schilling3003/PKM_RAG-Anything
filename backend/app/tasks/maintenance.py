@@ -15,6 +15,17 @@ from app.models.database import BackgroundTask, SearchHistory
 logger = logging.getLogger(__name__)
 
 
+@celery_app.task(name="app.tasks.maintenance.ping_task")
+def ping_task() -> str:
+    """
+    Simple ping task for health checks.
+    
+    Returns:
+        String "pong" to confirm task processing is working
+    """
+    return "pong"
+
+
 @celery_app.task(name="app.tasks.maintenance.cleanup_old_tasks")
 def cleanup_old_tasks() -> Dict[str, Any]:
     """

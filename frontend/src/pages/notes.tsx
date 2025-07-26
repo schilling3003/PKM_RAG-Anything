@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -18,13 +18,16 @@ export function NotesPage() {
   const [isCreatingNew, setIsCreatingNew] = useState(false)
 
   // Hooks
-  const { data: notes = [] } = useNotes()
+  const { data: notes } = useNotes()
   const { data: selectedNote } = useNote(selectedNoteId || '')
   const createNoteMutation = useCreateNote()
   const updateNoteMutation = useUpdateNote()
 
+  // Ensure we have an array to work with
+  const notesArray = Array.isArray(notes) ? notes : []
+
   // Filter notes based on search
-  const filteredNotes = notes.filter(note =>
+  const filteredNotes = notesArray.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase())
   )
@@ -58,7 +61,7 @@ export function NotesPage() {
   }
 
   // Handle saving note
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     if (!noteTitle.trim()) {
       toast.error('Please enter a note title')
       return
@@ -88,7 +91,7 @@ export function NotesPage() {
       toast.error('Failed to save note')
       console.error('Save error:', error)
     }
-  }
+  }, [noteTitle, isCreatingNew, editorContent, createNoteMutation, selectedNoteId, updateNoteMutation, navigate])
 
   return (
     <div className="flex h-full">

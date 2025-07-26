@@ -13,12 +13,15 @@ export function DocumentsPage() {
   const [selectedDocument, setSelectedDocument] = useState<Document | null>(null)
   const [activeTab, setActiveTab] = useState('list')
 
-  const { data: documents = [], refetch } = useQuery({
+  const { data: documents, refetch } = useQuery({
     queryKey: ['documents'],
     queryFn: documentsService.getDocuments,
   })
 
-  const processingDocuments = documents.filter(doc => 
+  // Ensure we have an array to work with
+  const documentsArray = Array.isArray(documents) ? documents : []
+
+  const processingDocuments = documentsArray.filter(doc => 
     doc.processing_status === 'processing' || doc.processing_status === 'queued'
   )
 
@@ -146,7 +149,7 @@ export function DocumentsPage() {
           <div className="flex items-center gap-2">
             <FileText className="w-5 h-5 text-blue-500" />
             <div>
-              <p className="text-2xl font-bold">{documents.length}</p>
+              <p className="text-2xl font-bold">{documentsArray.length}</p>
               <p className="text-sm text-muted-foreground">Total Documents</p>
             </div>
           </div>
@@ -157,7 +160,7 @@ export function DocumentsPage() {
             <Upload className="w-5 h-5 text-green-500" />
             <div>
               <p className="text-2xl font-bold">
-                {documents.filter(d => d.processing_status === 'completed').length}
+                {documentsArray.filter(d => d.processing_status === 'completed').length}
               </p>
               <p className="text-sm text-muted-foreground">Processed</p>
             </div>
@@ -169,7 +172,7 @@ export function DocumentsPage() {
             <FileText className="w-5 h-5 text-yellow-500" />
             <div>
               <p className="text-2xl font-bold">
-                {documents.filter(d => d.processing_status === 'processing' || d.processing_status === 'queued').length}
+                {documentsArray.filter(d => d.processing_status === 'processing' || d.processing_status === 'queued').length}
               </p>
               <p className="text-sm text-muted-foreground">Processing</p>
             </div>
@@ -181,7 +184,7 @@ export function DocumentsPage() {
             <FileText className="w-5 h-5 text-red-500" />
             <div>
               <p className="text-2xl font-bold">
-                {documents.filter(d => d.processing_status === 'failed').length}
+                {documentsArray.filter(d => d.processing_status === 'failed').length}
               </p>
               <p className="text-sm text-muted-foreground">Failed</p>
             </div>

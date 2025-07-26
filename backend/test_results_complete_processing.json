@@ -1,0 +1,79 @@
+{
+  "success": false,
+  "document_id": "b57889b4-180e-41b6-b49c-b17de016f551",
+  "total_time": 5.02357816696167,
+  "upload_result": {
+    "success": true,
+    "document_id": "b57889b4-180e-41b6-b49c-b17de016f551",
+    "task_id": "90531188-70e4-40a0-9931-b5ea80f70c7e",
+    "status": "queued"
+  },
+  "processing_result": {
+    "success": true,
+    "final_status": "completed",
+    "processing_time": 5.00676965713501,
+    "status_history": [
+      {
+        "timestamp": 1753563837.45447,
+        "elapsed": 0.003367900848388672,
+        "status": "processing",
+        "progress": 5,
+        "current_step": "Validating file"
+      },
+      {
+        "timestamp": 1753563842.4578075,
+        "elapsed": 5.006708145141602,
+        "status": "completed",
+        "progress": 0,
+        "current_step": ""
+      }
+    ],
+    "final_data": {
+      "document_id": "b57889b4-180e-41b6-b49c-b17de016f551",
+      "status": "completed",
+      "progress": 0,
+      "current_step": "",
+      "error": null,
+      "estimated_time_remaining": null
+    }
+  },
+  "verification_result": {
+    "document_data": {
+      "filename": "ai_knowledge_test.txt",
+      "file_type": "text/plain",
+      "file_size": 1615,
+      "id": "b57889b4-180e-41b6-b49c-b17de016f551",
+      "file_path": "data/uploads/b57889b4-180e-41b6-b49c-b17de016f551_ai_knowledge_test.txt",
+      "processing_status": "completed",
+      "processing_error": null,
+      "extracted_text": "\n        Artificial Intelligence and Machine Learning\n        \n        Artificial Intelligence (AI) is a branch of computer science that aims to create \n        intelligent machines that can perform tasks that typically require human intelligence.\n        \n        Machine Learning (ML) is a subset of AI that focuses on the development of algorithms \n        and statistical models that enable computers to learn and improve from experience \n        without being explicitly programmed.\n        \n        Key Concepts:\n        - Neural Networks: Computing systems inspired by biological neural networks\n        - Deep Learning: ML techniques based on artificial neural networks with multiple layers\n        - Natural Language Processing: AI capability to understand and generate human language\n        - Computer Vision: AI field that enables computers to interpret visual information\n        - Reinforcement Learning: Learning through interaction with an environment\n        \n        Applications:\n        - Autonomous vehicles use AI for navigation and decision-making\n        - Healthcare systems use ML for diagnosis and treatment recommendations\n        - Financial institutions use AI for fraud detection and risk assessment\n        - Search engines use NLP for understanding user queries\n        - Recommendation systems use ML to suggest relevant content\n        \n        The relationship between AI and ML is hierarchical: AI is the broader concept,\n        while ML is a specific approach to achieving AI. Deep Learning is a subset of ML\n        that has shown remarkable success in recent years.\n        ",
+      "doc_metadata": {
+        "file_type": "text/plain",
+        "file_size": 1615,
+        "processing_time": 0.061533451080322266,
+        "images_count": 0,
+        "tables_count": 0,
+        "has_audio_content": false,
+        "has_pdf_analysis": false,
+        "has_multimodal_content": false,
+        "embeddings_stored": true,
+        "knowledge_graph_built": true,
+        "kg_nodes_added": 0,
+        "kg_edges_added": 0,
+        "rag_anything_version": "latest",
+        "mineru_version": "2.0",
+        "audio_duration": 0,
+        "pdf_pages": 0
+      },
+      "created_at": "2025-07-26T21:03:57.445715",
+      "updated_at": "2025-07-26T21:03:57.514138"
+    },
+    "has_extracted_text": true,
+    "text_length": 1615,
+    "has_embeddings": false,
+    "has_knowledge_graph": false,
+    "search_works": false
+  },
+  "critical_checks_passed": 1,
+  "bonus_checks_passed": 0
+}

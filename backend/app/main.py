@@ -18,6 +18,7 @@ from app.core.exceptions import (
     validation_exception_handler,
     general_exception_handler
 )
+from app.core.error_monitoring import error_monitoring_service
 from app.core.middleware import RequestLoggingMiddleware, SecurityHeadersMiddleware
 from app.api.routes import api_router
 
@@ -70,6 +71,11 @@ async def lifespan(app: FastAPI):
     try:
         from app.core.migrations import initialize_migrations
         from app.core.vector_db import vector_db
+        from app.core.database import DatabaseManager
+        
+        # Create database tables first
+        DatabaseManager.init_database()
+        logger.info("✅ Database tables created")
         
         # Run database migrations
         migration_manager = initialize_migrations()

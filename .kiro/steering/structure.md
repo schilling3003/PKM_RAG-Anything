@@ -41,7 +41,7 @@ frontend/
 │   ├── components/        # Reusable React components
 │   ├── hooks/            # Custom React hooks
 │   ├── pages/            # Page-level components
-│   ├── services/         # API service layer
+│   ├── services/         # API service layer and mock data
 │   ├── types/            # TypeScript type definitions
 │   └── test/             # Test utilities and setup
 ├── public/               # Static assets
@@ -139,3 +139,4 @@ import type { SearchQuery } from '@/types/searchTypes'
 - **Frontend**: Tests co-located with components (`*.test.tsx`)
 - **Integration**: End-to-end tests in separate directory
 - **Fixtures**: Shared test data in dedicated fixtures modules
+- **Mock Data**: Development mock data in `frontend/src/services/mock-data.ts`

@@ -52,5 +52,10 @@ def downgrade():
         print("✅ RAG query history table removed successfully")
 
 
+def run_migration():
+    """Run the migration."""
+    upgrade()
+
+
 if __name__ == "__main__":
     upgrade()

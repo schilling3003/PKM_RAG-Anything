@@ -10,16 +10,16 @@ celery_app = Celery(
     "pkm_tasks",
     broker=settings.REDIS_URL,
     backend=settings.REDIS_URL,
-    include=["app.tasks.document_processing", "app.tasks.search_tasks"]
+    include=["app.tasks.document_processing", "app.tasks.search_tasks", "app.tasks.maintenance"]
 )
 
 # Configure Celery
 celery_app.conf.update(
-    # Task routing
-    task_routes={
-        "app.tasks.document_processing.*": {"queue": "document_processing"},
-        "app.tasks.search_tasks.*": {"queue": "search"},
-    },
+    # Task routing - using default queue for now
+    # task_routes={
+    #     "app.tasks.document_processing.*": {"queue": "document_processing"},
+    #     "app.tasks.search_tasks.*": {"queue": "search"},
+    # },
     
     # Task serialization
     task_serializer="json",

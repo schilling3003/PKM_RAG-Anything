@@ -32,12 +32,23 @@ export function MarkdownEditor({
   // Debounced content for auto-save
   const debouncedContent = useDebounce(content, autoSaveDelay)
   
+  // Track last saved content to avoid unnecessary saves
+  const lastSavedContentRef = useRef(content)
+  
+  // Update ref when content prop changes (e.g., when loading a different note)
+  useEffect(() => {
+    lastSavedContentRef.current = content
+  }, [content])
+  
   // Auto-save effect
   useEffect(() => {
-    if (autoSave && debouncedContent && onSave) {
+    if (autoSave && debouncedContent && onSave && 
+        debouncedContent !== lastSavedContentRef.current && 
+        debouncedContent.trim()) {
       onSave()
+      lastSavedContentRef.current = debouncedContent
     }
-  }, [debouncedContent, autoSave, onSave])
+  }, [debouncedContent, autoSave]) // Removed onSave from dependencies to prevent infinite loop
 
   const insertText = useCallback((before: string, after: string = '', placeholder: string = '') => {
     const textarea = textareaRef.current

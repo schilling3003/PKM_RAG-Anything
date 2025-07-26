@@ -9,6 +9,11 @@ services:
     volumes:
       - redis_data:/data
     command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   backend:
     build: 
@@ -16,35 +21,81 @@ services:
       dockerfile: Dockerfile.dev
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - DEBUG=true
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:///./data/pkm.db
       - CHROMA_DB_PATH=./data/chroma_db
       - RAG_STORAGE_DIR=./data/rag_storage
+      - UPLOAD_DIR=./data/uploads
+      - PROCESSED_DIR=./data/processed
+      - MAX_FILE_SIZE=104857600
+      - LOG_LEVEL=DEBUG
+      - MINERU_DEVICE=cpu
+      - MINERU_BACKEND=pipeline
+      - MINERU_LANG=en
+      # OpenAI Configuration (from .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - VISION_MODEL=${VISION_MODEL:-gpt-4o}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-large}
     volumes:
       - ./backend:/app
       - backend_data:/app/data
+      - ./data:/app/data
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    healthcheck:
+      test: ["CMD", "python", "-c", "import requests; requests.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
   celery:
     build: 
       context: ./backend
       dockerfile: Dockerfile.dev
+    env_file:
+      - .env
     environment:
       - DEBUG=true
       - REDIS_URL=redis://redis:6379/0
       - DATABASE_URL=sqlite:///./data/pkm.db
       - CHROMA_DB_PATH=./data/chroma_db
       - RAG_STORAGE_DIR=./data/rag_storage
+      - UPLOAD_DIR=./data/uploads
+      - PROCESSED_DIR=./data/processed
+      - MAX_FILE_SIZE=104857600
+      - LOG_LEVEL=DEBUG
+      - MINERU_DEVICE=cpu
+      - MINERU_BACKEND=pipeline
+      - MINERU_LANG=en
+      # OpenAI Configuration (from .env file)
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - OPENAI_BASE_URL=${OPENAI_BASE_URL:-https://api.openai.com/v1}
+      - LLM_MODEL=${LLM_MODEL:-gpt-4o-mini}
+      - VISION_MODEL=${VISION_MODEL:-gpt-4o}
+      - EMBEDDING_MODEL=${EMBEDDING_MODEL:-text-embedding-3-large}
     volumes:
       - ./backend:/app
       - backend_data:/app/data
+      - ./data:/app/data
     depends_on:
-      - redis
-    command: celery -A app.tasks.celery_app worker --loglevel=info --reload
+      redis:
+        condition: service_healthy
+    command: celery -A app.core.celery_app worker --loglevel=info --concurrency=1
+    healthcheck:
+      test: ["CMD", "celery", "-A", "app.core.celery_app", "inspect", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
 
 volumes:
   redis_data:

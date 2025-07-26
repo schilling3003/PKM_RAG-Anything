@@ -1,0 +1,21 @@
+This is a comprehensive test document for end-to-end processing validation.
+
+The document contains information about:
+- Artificial Intelligence and Machine Learning concepts
+- Natural Language Processing techniques
+- Knowledge Management Systems
+- Retrieval Augmented Generation (RAG) methodologies
+- Vector embeddings and semantic search capabilities
+- Knowledge graphs and entity relationship modeling
+
+This document should be processed through the complete pipeline:
+1. File upload and storage
+2. RAG-Anything multimodal processing with MinerU
+3. Text extraction and entity recognition
+4. LightRAG knowledge graph construction
+5. ChromaDB vector embedding generation
+6. Semantic search indexing
+
+The system should extract key entities like "Artificial Intelligence", "Machine Learning", "RAG", "Knowledge Graphs", and create relationships between these concepts in the knowledge graph.
+
+After processing, this document should be searchable through semantic queries and should contribute to RAG-based question answering about AI and ML topics.

@@ -106,12 +106,13 @@ class DocumentResponse(DocumentBase):
     processing_status: ProcessingStatus
     processing_error: Optional[str] = None
     extracted_text: Optional[str] = None
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: Dict[str, Any] = Field(default_factory=dict, alias="doc_metadata")
     created_at: datetime
     updated_at: datetime
     
     class Config:
         from_attributes = True
+        populate_by_name = True
 
 
 class DocumentsListResponse(BaseResponse):

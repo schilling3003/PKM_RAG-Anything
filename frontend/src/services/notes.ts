@@ -23,11 +23,19 @@ export interface UpdateNoteRequest {
   tags?: string[]
 }
 
+// Development mode flag - set to true to use mock data
+const USE_MOCK_DATA = false
+
 export const notesService = {
   // Get all notes
   async getNotes(): Promise<Note[]> {
+    if (USE_MOCK_DATA) {
+      const { mockNotes } = await import('./mock-data')
+      return new Promise(resolve => setTimeout(() => resolve(mockNotes), 400))
+    }
     const response = await api.get('/notes')
-    return response.data
+    // Backend returns { notes: Note[], total: number, message: string }
+    return response.data.notes || []
   },
 
   // Get a specific note

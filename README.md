@@ -12,6 +12,10 @@ A modern, self-hosted Personal Knowledge Management (PKM) system that combines t
 - **Knowledge Graph Backend**: LightRAG-powered graph construction and querying
 - **PDF Viewer**: Integrated PDF viewing with navigation, search, zoom, and annotation capabilities
 - **Real-time Processing**: Background document processing with live status updates
+- **Health Monitoring**: Comprehensive health check endpoints for all services
+- **OpenAI Integration**: Complete integration with OpenAI API for embeddings and chat completions
+- **Error Handling**: Robust error handling and recovery mechanisms
+- **Testing Suite**: Comprehensive backend testing with unit, integration, and load tests
 - **Easy Deployment**: Docker-based deployment for single-user or small team use
 - **Privacy-Focused**: All processing occurs locally or through user-configured services
 
@@ -22,13 +26,14 @@ A modern, self-hosted Personal Knowledge Management (PKM) system that combines t
 ### 📋 Planned
 - **WebSocket Integration**: Real-time collaborative features
 - **Performance Optimizations**: Caching and query optimization
-- **Comprehensive Testing**: Full test coverage for all components
+- **Frontend Testing**: Complete test coverage for React components
 
 ## Architecture
 
 - **Backend**: Python FastAPI with RAG-Anything, LightRAG, and MinerU 2.0
 - **Frontend**: React with ShadCN UI components and Tailwind CSS
 - **Storage**: SQLite for metadata, ChromaDB for vectors, NetworkX for graphs
+- **Database**: Automated migration system for schema updates
 - **Processing**: Celery + Redis for asynchronous document processing
 
 ## Quick Start
@@ -94,17 +99,23 @@ ai-pkm-tool/
 
 ## Development
 
-See [Development Guide](docs/development.md) for detailed setup instructions.
+The application includes an automated database migration system that handles schema updates automatically on startup. See [Development Guide](docs/development.md) for detailed setup instructions.
 
 ## Documentation
 
+### Setup and Installation
+- [Installation Guide](docs/installation-guide.md) - Comprehensive setup instructions for all environments
+- [Environment Variables](docs/environment-variables.md) - Complete configuration reference
+- [Deployment Guide](docs/deployment-guide.md) - Production deployment across different platforms
+
+### Operations and Maintenance
+- [Health Endpoints](docs/health-endpoints.md) - Monitoring and health check documentation
+- [Troubleshooting Guide](docs/troubleshooting-guide.md) - Common issues and solutions
+
+### Development and Features
 - [Development Guide](docs/development.md) - Setup and development workflow
 - [Implementation Status](docs/implementation-status.md) - Current feature status and roadmap
 - [PDF Viewer Guide](docs/pdf-viewer.md) - PDF viewing and annotation features
-- [User Guide](docs/user-guide.md) - How to use the application
-- [API Documentation](docs/api.md) - Backend API reference
-- [Deployment Guide](docs/deployment.md) - Production deployment
-- [Contributing](docs/contributing.md) - How to contribute
 
 ## License
 

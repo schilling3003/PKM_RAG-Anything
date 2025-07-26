@@ -1,0 +1,664 @@
+{
+  "test_results": [
+    [
+      "Health Endpoints",
+      true
+    ],
+    [
+      "Document Upload",
+      true
+    ],
+    [
+      "Search Functionality",
+      true
+    ],
+    [
+      "System Performance",
+      false
+    ]
+  ],
+  "detailed_results": {
+    "health_endpoints": {
+      "Basic Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 0.021105,
+        "data": {
+          "status": "healthy",
+          "service": "ai-pkm-backend",
+          "version": "0.1.0",
+          "timestamp": "2025-07-26T21:51:32.472799"
+        }
+      },
+      "API Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 0.014931,
+        "data": {
+          "status": "healthy",
+          "service": "api-component",
+          "version": null,
+          "timestamp": "2025-07-26T21:51:32.488428"
+        }
+      },
+      "Redis Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 0.018609,
+        "data": {
+          "service": "redis",
+          "status": "healthy",
+          "details": {
+            "ping": true,
+            "version": "7.4.5",
+            "connected_clients": 11,
+            "used_memory_human": "1.48M",
+            "uptime_in_seconds": 37,
+            "test_operations": "passed"
+          },
+          "timestamp": "2025-07-26T21:51:32.507550",
+          "response_time_ms": 2.15
+        }
+      },
+      "Celery Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 3.115985,
+        "data": {
+          "service": "celery",
+          "status": "degraded",
+          "details": {
+            "active_workers": 1,
+            "worker_names": [
+              "celery@34d6126bbde6"
+            ],
+            "total_registered_tasks": 7,
+            "task_test": "failed",
+            "task_test_error": "'app.tasks.maintenance.ping_task'",
+            "stats": {
+              "celery@34d6126bbde6": {
+                "total": {},
+                "pid": 1,
+                "clock": "29",
+                "uptime": 28,
+                "pool": {
+                  "implementation": "celery.concurrency.prefork:TaskPool",
+                  "max-concurrency": 1,
+                  "processes": [
+                    23
+                  ],
+                  "max-tasks-per-child": 1000,
+                  "put-guarded-by-semaphore": false,
+                  "timeouts": [
+                    300,
+                    600
+                  ],
+                  "writes": {
+                    "total": 0,
+                    "avg": "0.00",
+                    "all": "",
+                    "raw": "",
+                    "strategy": "fair",
+                    "inqueues": {
+                      "total": 1,
+                      "active": 0
+                    }
+                  }
+                },
+                "broker": {
+                  "hostname": "redis",
+                  "userid": null,
+                  "virtual_host": "0",
+                  "port": 6379,
+                  "insist": false,
+                  "ssl": false,
+                  "transport": "redis",
+                  "connect_timeout": 4,
+                  "transport_options": {},
+                  "login_method": null,
+                  "uri_prefix": null,
+                  "heartbeat": 120.0,
+                  "failover_strategy": "round-robin",
+                  "alternates": []
+                },
+                "prefetch_count": 1,
+                "rusage": {
+                  "utime": 0.783821,
+                  "stime": 1.2777910000000001,
+                  "maxrss": 140844,
+                  "ixrss": 0,
+                  "idrss": 0,
+                  "isrss": 0,
+                  "minflt": 40353,
+                  "majflt": 86,
+                  "nswap": 0,
+                  "inblock": 77912,
+                  "oublock": 1008,
+                  "msgsnd": 0,
+                  "msgrcv": 0,
+                  "nsignals": 0,
+                  "nvcsw": 5195,
+                  "nivcsw": 8797
+                }
+              }
+            }
+          },
+          "timestamp": "2025-07-26T21:51:35.629459",
+          "response_time_ms": 3108.9
+        }
+      },
+      "LightRAG Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 0.061362,
+        "data": {
+          "service": "lightrag",
+          "status": "healthy",
+          "details": {
+            "initialized": true,
+            "working_dir_exists": true,
+            "storage_info": {
+              "working_dir": "./data/rag_storage",
+              "exists": true,
+              "files": [
+                {
+                  "name": "kv_store_doc_status.json",
+                  "path": "kv_store_doc_status.json",
+                  "size": 458
+                },
+                {
+                  "name": "kv_store_llm_response_cache.json",
+                  "path": "knowledge_graph/kv_store_llm_response_cache.json",
+                  "size": 5347
+                }
+              ],
+              "total_size": 5805
+            },
+            "openai_service": {
+              "configured": true,
+              "available": false
+            },
+            "status": "healthy"
+          },
+          "timestamp": "2025-07-26T21:51:35.691406",
+          "response_time_ms": 46.631
+        }
+      },
+      "RAG-Anything Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 1.759806,
+        "data": {
+          "service": "raganything_mineru",
+          "status": "healthy",
+          "details": {
+            "raganything_version": "1.2.5",
+            "mineru_available": true,
+            "mineru_error": null,
+            "mineru_test_passed": true,
+            "mineru_test_error": null,
+            "cuda_available": false,
+            "cuda_version": null,
+            "device_setting": "cpu",
+            "config_file_exists": false,
+            "config_file_path": "backend/magic-pdf.json"
+          },
+          "timestamp": "2025-07-26T21:51:37.455857",
+          "response_time_ms": 1743.9450000000002
+        }
+      },
+      "OpenAI Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 1.298732,
+        "data": {
+          "service": "openai",
+          "status": "healthy",
+          "details": {
+            "service": "openai",
+            "configured": true,
+            "available": false,
+            "base_url": "https://api.openai.com/v1",
+            "models": {
+              "llm": "gpt-4o-mini",
+              "vision": "gpt-4o",
+              "embedding": "text-embedding-3-large"
+            },
+            "last_test": null,
+            "fallback_enabled": true,
+            "api_key_configured": true,
+            "client_initialized": true,
+            "connectivity_test": true,
+            "model_access": {
+              "gpt-4o-mini": true,
+              "text-embedding-3-large": true,
+              "gpt-4o": true
+            },
+            "embedding_access": true,
+            "error": null,
+            "response_time": 0.7374577522277832
+          },
+          "timestamp": "2025-07-26T21:51:38.758705",
+          "response_time_ms": 1285.569
+        }
+      },
+      "Storage Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 0.084528,
+        "data": {
+          "service": "storage",
+          "status": "healthy",
+          "details": {
+            "upload_dir": {
+              "path": "./data/uploads",
+              "exists": true,
+              "writable": true,
+              "write_test_passed": true,
+              "total_size_bytes": 0,
+              "file_count": 0
+            },
+            "processed_dir": {
+              "path": "./data/processed",
+              "exists": true,
+              "writable": true,
+              "write_test_passed": true,
+              "total_size_bytes": 0,
+              "file_count": 0
+            },
+            "rag_storage_dir": {
+              "path": "./data/rag_storage",
+              "exists": true,
+              "writable": true,
+              "write_test_passed": true,
+              "total_size_bytes": 5805,
+              "file_count": 2
+            },
+            "chroma_db_path": {
+              "path": "./data/chroma_db",
+              "exists": true,
+              "writable": true,
+              "write_test_passed": true,
+              "total_size_bytes": 147456,
+              "file_count": 1
+            },
+            "database": {
+              "path": "./data/pkm.db",
+              "exists": true,
+              "directory_writable": true,
+              "size_bytes": 4096
+            }
+          },
+          "timestamp": "2025-07-26T21:51:38.843986",
+          "response_time_ms": 66.865
+        }
+      },
+      "Comprehensive Health": {
+        "status_code": 200,
+        "success": true,
+        "response_time": 4.319135,
+        "data": {
+          "overall_status": "degraded",
+          "services": {
+            "redis": {
+              "service": "redis",
+              "status": "healthy",
+              "details": {
+                "ping": true,
+                "version": "7.4.5",
+                "connected_clients": 18,
+                "used_memory_human": "1.69M",
+                "uptime_in_seconds": 43,
+                "test_operations": "passed"
+              },
+              "timestamp": "2025-07-26T21:51:38.862266",
+              "response_time_ms": 1.785
+            },
+            "celery": {
+              "service": "celery",
+              "status": "degraded",
+              "details": {
+                "active_workers": 1,
+                "worker_names": [
+                  "celery@34d6126bbde6"
+                ],
+                "total_registered_tasks": 7,
+                "task_test": "failed",
+                "task_test_error": "'app.tasks.maintenance.ping_task'",
+                "stats": {
+                  "celery@34d6126bbde6": {
+                    "total": {},
+                    "pid": 1,
+                    "clock": "41",
+                    "uptime": 34,
+                    "pool": {
+                      "implementation": "celery.concurrency.prefork:TaskPool",
+                      "max-concurrency": 1,
+                      "processes": [
+                        23
+                      ],
+                      "max-tasks-per-child": 1000,
+                      "put-guarded-by-semaphore": false,
+                      "timeouts": [
+                        300,
+                        600
+                      ],
+                      "writes": {
+                        "total": 0,
+                        "avg": "0.00",
+                        "all": "",
+                        "raw": "",
+                        "strategy": "fair",
+                        "inqueues": {
+                          "total": 1,
+                          "active": 0
+                        }
+                      }
+                    },
+                    "broker": {
+                      "hostname": "redis",
+                      "userid": null,
+                      "virtual_host": "0",
+                      "port": 6379,
+                      "insist": false,
+                      "ssl": false,
+                      "transport": "redis",
+                      "connect_timeout": 4,
+                      "transport_options": {},
+                      "login_method": null,
+                      "uri_prefix": null,
+                      "heartbeat": 120.0,
+                      "failover_strategy": "round-robin",
+                      "alternates": []
+                    },
+                    "prefetch_count": 1,
+                    "rusage": {
+                      "utime": 0.790414,
+                      "stime": 1.2793299999999999,
+                      "maxrss": 140844,
+                      "ixrss": 0,
+                      "idrss": 0,
+                      "isrss": 0,
+                      "minflt": 40548,
+                      "majflt": 86,
+                      "nswap": 0,
+                      "inblock": 77912,
+                      "oublock": 1008,
+                      "msgsnd": 0,
+                      "msgrcv": 0,
+                      "nsignals": 0,
+                      "nvcsw": 5231,
+                      "nivcsw": 8797
+                    }
+                  }
+                }
+              },
+              "timestamp": "2025-07-26T21:51:41.873713",
+              "response_time_ms": 3011.366
+            },
+            "lightrag": {
+              "service": "lightrag",
+              "status": "healthy",
+              "details": {
+                "initialized": true,
+                "working_dir_exists": true,
+                "storage_info": {
+                  "working_dir": "./data/rag_storage",
+                  "exists": true,
+                  "files": [
+                    {
+                      "name": "kv_store_doc_status.json",
+                      "path": "kv_store_doc_status.json",
+                      "size": 458
+                    },
+                    {
+                      "name": "kv_store_llm_response_cache.json",
+                      "path": "knowledge_graph/kv_store_llm_response_cache.json",
+                      "size": 5347
+                    }
+                  ],
+                  "total_size": 5805
+                },
+                "openai_service": {
+                  "configured": true,
+                  "available": true
+                },
+                "status": "healthy"
+              },
+              "timestamp": "2025-07-26T21:51:41.890155",
+              "response_time_ms": 16.415
+            },
+            "raganything_mineru": {
+              "service": "raganything_mineru",
+              "status": "healthy",
+              "details": {
+                "raganything_version": "1.2.5",
+                "mineru_available": true,
+                "mineru_error": null,
+                "mineru_test_passed": true,
+                "mineru_test_error": null,
+                "cuda_available": false,
+                "cuda_version": null,
+                "device_setting": "cpu",
+                "config_file_exists": false,
+                "config_file_path": "backend/magic-pdf.json"
+              },
+              "timestamp": "2025-07-26T21:51:41.890324",
+              "response_time_ms": 0.146
+            },
+            "openai": {
+              "service": "openai",
+              "status": "healthy",
+              "details": {
+                "service": "openai",
+                "configured": true,
+                "available": true,
+                "base_url": "https://api.openai.com/v1",
+                "models": {
+                  "llm": "gpt-4o-mini",
+                  "vision": "gpt-4o",
+                  "embedding": "text-embedding-3-large"
+                },
+                "last_test": {
+                  "api_key_configured": true,
+                  "client_initialized": true,
+                  "connectivity_test": true,
+                  "model_access": {
+                    "gpt-4o-mini": true,
+                    "text-embedding-3-large": true,
+                    "gpt-4o": true
+                  },
+                  "embedding_access": true,
+                  "error": null,
+                  "response_time": 0.7374577522277832
+                },
+                "fallback_enabled": true,
+                "api_key_configured": true,
+                "client_initialized": true,
+                "connectivity_test": true,
+                "model_access": {
+                  "gpt-4o-mini": true,
+                  "text-embedding-3-large": true,
+                  "gpt-4o": true
+                },
+                "embedding_access": true,
+                "error": null,
+                "response_time": 0.6120402812957764
+              },
+              "timestamp": "2025-07-26T21:51:43.176573",
+              "response_time_ms": 1286.2359999999999
+            },
+            "storage": {
+              "service": "storage",
+              "status": "healthy",
+              "details": {
+                "upload_dir": {
+                  "path": "./data/uploads",
+                  "exists": true,
+                  "writable": true,
+                  "write_test_passed": true,
+                  "total_size_bytes": 0,
+                  "file_count": 0
+                },
+                "processed_dir": {
+                  "path": "./data/processed",
+                  "exists": true,
+                  "writable": true,
+                  "write_test_passed": true,
+                  "total_size_bytes": 0,
+                  "file_count": 0
+                },
+                "rag_storage_dir": {
+                  "path": "./data/rag_storage",
+                  "exists": true,
+                  "writable": true,
+                  "write_test_passed": true,
+                  "total_size_bytes": 5805,
+                  "file_count": 2
+                },
+                "chroma_db_path": {
+                  "path": "./data/chroma_db",
+                  "exists": true,
+                  "writable": true,
+                  "write_test_passed": true,
+                  "total_size_bytes": 147456,
+                  "file_count": 1
+                },
+                "database": {
+                  "path": "./data/pkm.db",
+                  "exists": true,
+                  "directory_writable": true,
+                  "size_bytes": 4096
+                }
+              },
+              "timestamp": "2025-07-26T21:51:41.954259",
+              "response_time_ms": 63.18899999999999
+            },
+            "error_monitoring": {
+              "service": "error_monitoring",
+              "status": "healthy",
+              "details": {
+                "active_alerts": 0,
+                "total_errors": 0,
+                "system_health": {
+                  "status": "healthy",
+                  "total_errors": 0,
+                  "critical_errors": 0,
+                  "high_severity_errors": 0,
+                  "recommendations": []
+                },
+                "alert_breakdown": {
+                  "info": 0,
+                  "warning": 0,
+                  "error": 0,
+                  "critical": 0
+                },
+                "monitoring_enabled": true
+              },
+              "timestamp": "2025-07-26T21:51:43.176626",
+              "response_time_ms": null
+            }
+          },
+          "timestamp": "2025-07-26T21:51:43.176629",
+          "summary": {
+            "healthy": 5,
+            "degraded": 1,
+            "unhealthy": 0
+          }
+        }
+      }
+    },
+    "document_upload": {
+      "success": true,
+      "document_id": "6bc9cbc3-7a39-4eb7-a2b2-3b948ab4d708",
+      "task_id": "6df16df8-e7c4-433c-9cec-2fc2fcd38832",
+      "document_data": {
+        "filename": "test_comprehensive.txt",
+        "file_type": "text/plain",
+        "file_size": 745,
+        "id": "6bc9cbc3-7a39-4eb7-a2b2-3b948ab4d708",
+        "file_path": "data/uploads/6bc9cbc3-7a39-4eb7-a2b2-3b948ab4d708_test_comprehensive.txt",
+        "processing_status": "queued",
+        "processing_error": null,
+        "extracted_text": null,
+        "doc_metadata": {},
+        "created_at": "2025-07-26T21:51:45.236150",
+        "updated_at": "2025-07-26T21:51:45.246061"
+      }
+    },
+    "search_functionality": {
+      "Semantic Search": {
+        "success": true,
+        "response_time": 4.775263,
+        "data": {
+          "success": true,
+          "query": "artificial intelligence",
+          "results": [],
+          "total": 0,
+          "parameters": {
+            "limit": 5,
+            "content_types": null,
+            "similarity_threshold": 0.7
+          }
+        }
+      },
+      "RAG Query": {
+        "success": true,
+        "response_time": 1.733321,
+        "data": {
+          "success": true,
+          "response": {
+            "query": "What is machine learning?",
+            "answer": "Sorry, I'm not able to provide an answer to that question.[no-context]",
+            "mode": "hybrid",
+            "sources": [],
+            "processing_time": 1.678712,
+            "token_count": 11
+          }
+        }
+      },
+      "Hybrid Search": {
+        "success": true,
+        "response_time": 1.652176,
+        "data": {
+          "success": true,
+          "query": "knowledge management",
+          "timestamp": "2025-07-26T21:51:51.782196",
+          "semantic_results": [],
+          "rag_response": {
+            "query": "knowledge management",
+            "answer": "Sorry, I'm not able to provide an answer to that question.[no-context]",
+            "mode": "hybrid",
+            "sources": [],
+            "processing_time": 1.565959,
+            "token_count": 11
+          }
+        }
+      }
+    },
+    "performance": {
+      "Health Check": {
+        "success": true,
+        "response_time": 0.00850367546081543,
+        "status_code": 200
+      },
+      "Comprehensive Health": {
+        "success": true,
+        "response_time": 9.142467021942139,
+        "status_code": 200
+      },
+      "Document List": {
+        "success": true,
+        "response_time": 0.026786327362060547,
+        "status_code": 200
+      }
+    }
+  },
+  "summary": {
+    "total_tests": 4,
+    "successful_tests": 3,
+    "success_rate": 0.75,
+    "total_time": 30.131394147872925,
+    "overall_success": true
+  }
+}

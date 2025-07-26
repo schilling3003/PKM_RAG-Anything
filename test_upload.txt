@@ -1,0 +1,14 @@
+This is a test document for the AI PKM Tool comprehensive testing.
+
+The document contains information about artificial intelligence, machine learning, and knowledge management systems.
+
+Key concepts covered:
+- Natural Language Processing (NLP)
+- Large Language Models (LLMs) 
+- Retrieval Augmented Generation (RAG)
+- Knowledge Graphs and semantic relationships
+- Vector embeddings and similarity search
+
+This document should be processed by the RAG-Anything framework with MinerU 2.0 for document extraction, indexed in the knowledge graph using LightRAG, and made searchable through semantic embeddings in ChromaDB.
+
+The comprehensive testing suite validates all these components working together in the AI PKM Tool.

@@ -30,8 +30,8 @@ export function Sidebar({ className }: SidebarProps) {
   const [notesExpanded, setNotesExpanded] = useState(true)
   const [documentsExpanded, setDocumentsExpanded] = useState(true)
   
-  const { data: notes = [] } = useNotes()
-  const { data: documents = [] } = useDocuments()
+  const { data: notes, isError: notesError, isLoading: notesLoading } = useNotes()
+  const { data: documents, isError: documentsError, isLoading: documentsLoading } = useDocuments()
 
   const navigationItems = [
     {
@@ -51,12 +51,16 @@ export function Sidebar({ className }: SidebarProps) {
     },
   ]
 
-  const filteredNotes = notes.filter(note =>
+  // Ensure we have arrays to work with, even if data is undefined
+  const notesArray = Array.isArray(notes) ? notes : []
+  const documentsArray = Array.isArray(documents) ? documents : []
+
+  const filteredNotes = notesArray.filter(note =>
     note.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
     note.content.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  const filteredDocuments = documents.filter(doc =>
+  const filteredDocuments = documentsArray.filter(doc =>
     doc.filename.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
@@ -140,7 +144,11 @@ export function Sidebar({ className }: SidebarProps) {
             
             {notesExpanded && (
               <div className="space-y-1 ml-2">
-                {filteredNotes.length === 0 ? (
+                {notesLoading ? (
+                  <p className="text-xs text-muted-foreground py-2">Loading notes...</p>
+                ) : notesError ? (
+                  <p className="text-xs text-red-500 py-2">Failed to load notes</p>
+                ) : filteredNotes.length === 0 ? (
                   <p className="text-xs text-muted-foreground py-2">
                     {searchQuery ? 'No notes found' : 'No notes yet'}
                   </p>
@@ -197,7 +205,11 @@ export function Sidebar({ className }: SidebarProps) {
             
             {documentsExpanded && (
               <div className="space-y-1 ml-2">
-                {filteredDocuments.length === 0 ? (
+                {documentsLoading ? (
+                  <p className="text-xs text-muted-foreground py-2">Loading documents...</p>
+                ) : documentsError ? (
+                  <p className="text-xs text-red-500 py-2">Failed to load documents</p>
+                ) : filteredDocuments.length === 0 ? (
                   <p className="text-xs text-muted-foreground py-2">
                     {searchQuery ? 'No documents found' : 'No documents yet'}
                   </p>

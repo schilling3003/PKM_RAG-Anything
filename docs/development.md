@@ -213,6 +213,22 @@ The application supports various AI models:
 2. **TanStack Query DevTools**: Available in development mode
 3. **Console logs**: Check browser developer tools
 
+### Frontend Best Practices
+
+**Handling Async Data:**
+When working with data from TanStack Query hooks, always use defensive programming to handle undefined states:
+
+```typescript
+// Good: Defensive programming
+const { data: notes } = useNotes()
+const notesArray = Array.isArray(notes) ? notes : []
+
+// Avoid: Direct usage without null checks
+const { data: notes = [] } = useNotes() // Can cause issues during loading
+```
+
+This pattern prevents runtime errors when components render before data is loaded.
+
 ## Common Issues
 
 ### Port Conflicts
@@ -227,12 +243,32 @@ lsof -i :3000
 kill -9 <PID>
 ```
 
-### Database Issues
+### Database Management
 
-Reset database:
+**Database Migrations:**
+The application includes an automated migration system that handles database schema updates:
+
+```bash
+# Migrations run automatically on application startup
+# Manual migration management (if needed):
+cd backend
+python -c "from app.core.migrations import initialize_migrations; initialize_migrations().run_migrations()"
+```
+
+**Migration Files:**
+- SQL migrations: `backend/app/core/migrations/*.sql` - Direct SQL commands for schema changes
+- Python migrations: `backend/app/core/migrations/*.py` - Python scripts with `run_migration()` function
+- Migration tracking: Stored in `migrations` table with applied timestamps
+
+**Creating New Migrations:**
+- SQL migrations: Create `.sql` files with DDL statements
+- Python migrations: Create `.py` files with `run_migration()` function that calls `upgrade()`
+- Files are executed in alphabetical order
+
+**Reset Database:**
 ```bash
 rm -rf data/pkm.db
-# Restart the application to recreate
+# Restart the application to recreate and run migrations
 ```
 
 ### Redis Connection Issues
@@ -293,6 +329,41 @@ docker-compose -f docker-compose.dev.yml restart redis
    - WebSocket integration for live updates
    - Real-time processing status updates
    - Collaborative editing indicators
+
+## Mock Data for Development
+
+The frontend includes a comprehensive mock data system for development and testing:
+
+### Mock Data Files
+- **Location**: `frontend/src/services/mock-data.ts`
+- **Purpose**: Provides realistic test data for UI development without backend dependency
+
+### Available Mock Data
+- **Documents**: Sample documents with various file types (PDF, DOCX, PPTX, PNG)
+- **Processing Status**: Mock processing states and progress indicators
+- **Notes**: Sample markdown notes with metadata
+
+### Usage
+```typescript
+import { mockDocuments, mockProcessingStatus, mockNotes } from '@/services/mock-data'
+
+// Use in components for development
+const documents = mockDocuments
+const status = mockProcessingStatus
+```
+
+### Mock Document Types
+- PDF documents with extracted text and metadata
+- Office documents (Word, PowerPoint) 
+- Image files with OCR text extraction
+- Various processing states: queued, processing, completed, failed
+- Realistic file sizes and timestamps
+
+This mock data system enables:
+- Frontend development without backend services
+- UI testing with consistent data
+- Component development and styling
+- Integration testing scenarios
 
 ## Contributing
 

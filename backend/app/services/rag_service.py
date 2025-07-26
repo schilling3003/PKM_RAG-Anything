@@ -5,7 +5,7 @@ RAG (Retrieval-Augmented Generation) service for question answering.
 import os
 import json
 import asyncio
-import logging
+import structlog
 from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime, timedelta
 from dataclasses import dataclass
@@ -17,9 +17,16 @@ from app.services.semantic_search import semantic_search_service
 from app.core.database import get_db
 from app.models.database import RAGQueryHistory
 from app.models.schemas import RAGQuery, RAGResponse
-from app.core.exceptions import SearchError
+from app.core.exceptions import SearchError, ExternalServiceError, DatabaseError
+from app.core.service_health import service_health_monitor
+from app.core.retry_utils import (
+    retry_with_backoff, 
+    RetryConfig, 
+    with_graceful_degradation,
+    retry_database_operation
+)
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 @dataclass
@@ -106,6 +113,11 @@ class RAGService:
             logger.warning("LightRAG not available for RAG queries")
             self.lightrag_available = False
     
+    @retry_with_backoff(
+        config=RetryConfig(max_retries=2, backoff_factor=1.5),
+        service_name="lightrag",
+        operation_name="rag_query"
+    )
     async def process_rag_query(
         self,
         query: str,
@@ -129,18 +141,60 @@ class RAGService:
         Returns:
             RAG response with answer and sources
         """
+        start_time = datetime.utcnow()
+        
+        query_context = {
+            "query": query[:100] + "..." if len(query) > 100 else query,
+            "mode": mode,
+            "max_tokens": max_tokens,
+            "include_sources": include_sources,
+            "has_conversation_history": bool(conversation_history),
+            "use_cache": use_cache,
+            "operation": "rag_query"
+        }
+        
         try:
-            start_time = datetime.utcnow()
-            logger.info(f"Processing RAG query: '{query[:50]}...' (mode: {mode})")
+            logger.info("Processing RAG query", **query_context)
+            
+            # Validate query
+            if not query or not query.strip():
+                raise SearchError(
+                    "Empty query provided",
+                    details=query_context,
+                    user_message="Please provide a question to search for.",
+                    recovery_suggestions=[
+                        "Enter a specific question or search term",
+                        "Try asking about topics in your knowledge base",
+                        "Use keywords related to your documents"
+                    ]
+                )
+            
+            # Check if query is too long
+            if len(query) > 1000:
+                raise SearchError(
+                    "Query too long",
+                    details=query_context,
+                    user_message="Your question is too long. Please make it more concise.",
+                    recovery_suggestions=[
+                        "Shorten your question to the main points",
+                        "Break complex questions into simpler parts",
+                        "Focus on the most important aspects"
+                    ]
+                )
             
             # Generate context hash for caching
             context_hash = self._generate_context_hash(conversation_history)
+            query_context["context_hash"] = context_hash
             
             # Check cache first
             if use_cache:
-                cached_result = self.cache.get(query, mode, context_hash)
-                if cached_result:
-                    return RAGResponse(**cached_result)
+                try:
+                    cached_result = self.cache.get(query, mode, context_hash)
+                    if cached_result:
+                        logger.info("Returning cached RAG result", **query_context)
+                        return RAGResponse(**cached_result)
+                except Exception as e:
+                    logger.warning("Cache retrieval failed", error=str(e), **query_context)
             
             # Build comprehensive context
             context = await self._build_rag_context(
@@ -158,7 +212,11 @@ class RAGService:
             # Extract and format sources
             sources = []
             if include_sources:
-                sources = await self._extract_and_format_sources(context)
+                try:
+                    sources = await self._extract_and_format_sources(context)
+                except Exception as e:
+                    logger.warning("Source extraction failed", error=str(e), **query_context)
+                    sources = []
             
             processing_time = (datetime.utcnow() - start_time).total_seconds()
             
@@ -174,17 +232,41 @@ class RAGService:
             
             # Cache the result
             if use_cache:
-                self.cache.set(query, mode, context_hash, response.dict())
+                try:
+                    self.cache.set(query, mode, context_hash, response.dict())
+                except Exception as e:
+                    logger.warning("Cache storage failed", error=str(e), **query_context)
             
             # Save to query history
-            await self._save_query_history(query, mode, response)
+            try:
+                await self._save_query_history(query, mode, response)
+            except Exception as e:
+                logger.warning("Query history save failed", error=str(e), **query_context)
             
-            logger.info(f"RAG query completed in {processing_time:.2f}s")
+            logger.info("RAG query completed successfully", 
+                       processing_time=processing_time,
+                       answer_length=len(answer),
+                       sources_count=len(sources),
+                       **query_context)
+            
             return response
             
+        except SearchError:
+            # Re-raise SearchError with context
+            raise
         except Exception as e:
-            logger.error(f"RAG query failed: {e}")
-            raise SearchError(f"RAG query failed: {e}")
+            logger.error("RAG query failed", error=str(e), **query_context)
+            raise SearchError(
+                f"RAG query failed: {str(e)}",
+                details=query_context,
+                user_message="Failed to process your question. Please try again with a different query.",
+                recovery_suggestions=[
+                    "Try rephrasing your question",
+                    "Use simpler language or keywords",
+                    "Check if your knowledge base contains relevant content",
+                    "Contact support if the issue persists"
+                ]
+            )
     
     async def _build_rag_context(
         self,

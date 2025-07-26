@@ -7,11 +7,20 @@ from datetime import datetime
 from typing import List, Optional, Dict, Any
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, and_, func
+from sqlalchemy.exc import SQLAlchemyError
 
 from app.models.database import Note
 from app.models.schemas import NoteCreate, NoteUpdate, NoteResponse
 from app.core.database import SessionLocal
-from app.core.exceptions import NotFoundError, ValidationError
+from app.core.exceptions import (
+    NotFoundError, 
+    ValidationError, 
+    DatabaseError,
+    ConflictError,
+    ErrorCategory,
+    ErrorSeverity
+)
+from app.core.error_utils import handle_errors, retry_on_failure, ErrorContext
 
 
 class NotesService:
@@ -46,6 +55,18 @@ class NotesService:
         
         return True
     
+    @handle_errors(
+        operation="create_note",
+        category=ErrorCategory.DATABASE,
+        severity=ErrorSeverity.MEDIUM,
+        user_message="Failed to create note. Please try again.",
+        recovery_suggestions=[
+            "Check if a note with this title already exists",
+            "Verify the note content is valid markdown",
+            "Try with a shorter title or content",
+            "Contact support if the issue persists"
+        ]
+    )
     async def create_note(self, note_data: NoteCreate) -> NoteResponse:
         """Create a new note."""
         db = self.db_session()
@@ -77,54 +98,144 @@ class NotesService:
         finally:
             db.close()
     
+    @handle_errors(
+        operation="get_note",
+        category=ErrorCategory.DATABASE,
+        severity=ErrorSeverity.LOW,
+        user_message="Failed to retrieve note.",
+        recovery_suggestions=[
+            "Check if the note ID is correct",
+            "Verify the note hasn't been deleted",
+            "Try refreshing the page",
+            "Search for the note using the search function"
+        ]
+    )
     async def get_note(self, note_id: str) -> NoteResponse:
         """Get a note by ID."""
-        db = self.db_session()
-        try:
-            note = db.query(Note).filter(Note.id == note_id).first()
-            if not note:
-                raise NotFoundError(f"Note with ID {note_id} not found")
+        with ErrorContext("get_note") as ctx:
+            ctx.add_context("note_id", note_id)
             
-            return NoteResponse.model_validate(note)
-            
-        finally:
-            db.close()
+            db = self.db_session()
+            try:
+                note = db.query(Note).filter(Note.id == note_id).first()
+                if not note:
+                    raise NotFoundError(
+                        f"Note with ID {note_id} not found",
+                        details={"note_id": note_id},
+                        user_message="The requested note could not be found.",
+                        recovery_suggestions=[
+                            "Check if the note ID is correct",
+                            "Verify the note hasn't been deleted",
+                            "Try searching for the note by title",
+                            "Check your recent notes list"
+                        ]
+                    )
+                
+                return NoteResponse.model_validate(note)
+                
+            except SQLAlchemyError as e:
+                raise DatabaseError(
+                    f"Database error while retrieving note {note_id}",
+                    details={"note_id": note_id, "db_error": str(e)}
+                ) from e
+            finally:
+                db.close()
     
+    @handle_errors(
+        operation="update_note",
+        category=ErrorCategory.DATABASE,
+        severity=ErrorSeverity.MEDIUM,
+        user_message="Failed to update note. Please try again.",
+        recovery_suggestions=[
+            "Check if the note still exists",
+            "Verify the markdown content is valid",
+            "Try saving with a shorter title or content",
+            "Refresh the page and try again"
+        ]
+    )
+    @retry_on_failure(max_attempts=2, base_delay=0.5)
     async def update_note(self, note_id: str, note_data: NoteUpdate) -> NoteResponse:
         """Update an existing note."""
-        db = self.db_session()
-        try:
-            note = db.query(Note).filter(Note.id == note_id).first()
-            if not note:
-                raise NotFoundError(f"Note with ID {note_id} not found")
+        with ErrorContext("update_note") as ctx:
+            ctx.add_context("note_id", note_id)
+            ctx.add_context("has_title_update", note_data.title is not None)
+            ctx.add_context("has_content_update", note_data.content is not None)
             
-            # Update fields if provided
-            if note_data.title is not None:
-                note.title = note_data.title
-            
-            if note_data.content is not None:
-                # Validate markdown content
-                if not self._validate_markdown(note_data.content):
-                    raise ValidationError("Invalid markdown syntax")
+            db = self.db_session()
+            try:
+                note = db.query(Note).filter(Note.id == note_id).first()
+                if not note:
+                    raise NotFoundError(
+                        f"Note with ID {note_id} not found",
+                        details={"note_id": note_id},
+                        user_message="The note you're trying to update could not be found.",
+                        recovery_suggestions=[
+                            "Check if the note was deleted by another user",
+                            "Verify the note ID is correct",
+                            "Try refreshing the page",
+                            "Create a new note with this content"
+                        ]
+                    )
                 
-                note.content = note_data.content
-                note.word_count = self._count_words(note_data.content)
-            
-            if note_data.tags is not None:
-                note.tags = note_data.tags
-            
-            note.updated_at = datetime.utcnow()
-            
-            db.commit()
-            db.refresh(note)
-            
-            return NoteResponse.model_validate(note)
-            
-        except Exception as e:
-            db.rollback()
-            raise e
-        finally:
-            db.close()
+                # Validate content if provided
+                if note_data.content is not None:
+                    if not self._validate_markdown(note_data.content):
+                        raise ValidationError(
+                            "Invalid markdown syntax in note content",
+                            details={"note_id": note_id, "content_length": len(note_data.content)},
+                            user_message="The note content contains invalid markdown syntax.",
+                            recovery_suggestions=[
+                                "Check for unmatched brackets [ ] or parentheses ( )",
+                                "Verify link syntax is correct",
+                                "Use the preview pane to identify syntax errors",
+                                "Try saving without complex markdown formatting"
+                            ]
+                        )
+                
+                # Check for title conflicts if title is being updated
+                if note_data.title is not None and note_data.title != note.title:
+                    existing_note = db.query(Note).filter(
+                        and_(Note.title == note_data.title, Note.id != note_id)
+                    ).first()
+                    if existing_note:
+                        raise ConflictError(
+                            f"A note with title '{note_data.title}' already exists",
+                            conflicting_resource=existing_note.id,
+                            details={"existing_note_id": existing_note.id, "title": note_data.title}
+                        )
+                
+                # Update fields if provided
+                if note_data.title is not None:
+                    note.title = note_data.title
+                
+                if note_data.content is not None:
+                    note.content = note_data.content
+                    note.word_count = self._count_words(note_data.content)
+                
+                if note_data.tags is not None:
+                    note.tags = note_data.tags
+                
+                note.updated_at = datetime.utcnow()
+                
+                db.commit()
+                db.refresh(note)
+                
+                return NoteResponse.model_validate(note)
+                
+            except SQLAlchemyError as e:
+                db.rollback()
+                raise DatabaseError(
+                    f"Database error while updating note {note_id}",
+                    details={"note_id": note_id, "db_error": str(e)}
+                ) from e
+            except (NotFoundError, ValidationError, ConflictError):
+                db.rollback()
+                raise
+            except Exception as e:
+                db.rollback()
+                raise
+            finally:
+                db.close()
     
     async def delete_note(self, note_id: str) -> bool:
         """Delete a note."""

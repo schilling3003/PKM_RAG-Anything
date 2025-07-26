@@ -1,0 +1,8 @@
+{
+  "device": "cuda",
+  "models-dir": "./models",
+  "latex-delimiter-config": {
+    "inline_delimiters": [["$", "$"], ["\\(", "\\)"]],
+    "block_delimiters": [["$$", "$$"], ["\\[", "\\]"]]
+  }
+}

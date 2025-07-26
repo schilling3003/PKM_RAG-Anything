@@ -10,12 +10,14 @@ from typing import Dict, Any, Optional, List
 from pathlib import Path
 import aiofiles
 from fastapi import UploadFile
-import logging
+import structlog
 
 from app.core.config import settings
-from app.core.exceptions import FileStorageError
+from app.core.exceptions import FileStorageError, ValidationError
+from app.core.service_health import service_health_monitor
+from app.core.retry_utils import retry_file_operation, with_graceful_degradation
 
-logger = logging.getLogger(__name__)
+logger = structlog.get_logger(__name__)
 
 
 class FileManager:
@@ -35,7 +37,7 @@ class FileManager:
     
     async def save_uploaded_file(self, file: UploadFile, document_id: Optional[str] = None) -> Dict[str, Any]:
         """
-        Save uploaded file to storage.
+        Save uploaded file to storage with comprehensive error handling.
         
         Args:
             file: FastAPI UploadFile object
@@ -44,21 +46,51 @@ class FileManager:
         Returns:
             Dict containing file information
         """
+        # Generate document ID if not provided
+        if not document_id:
+            document_id = str(uuid.uuid4())
+        
+        upload_context = {
+            "document_id": document_id,
+            "original_filename": file.filename,
+            "content_type": file.content_type,
+            "operation": "file_upload"
+        }
+        
         try:
-            # Generate document ID if not provided
-            if not document_id:
-                document_id = str(uuid.uuid4())
+            logger.info("Starting file upload", **upload_context)
+            
+            # Check storage service availability
+            await service_health_monitor.ensure_service_available("storage", "file upload")
             
             # Validate file
             validation_result = await self._validate_upload(file)
             if not validation_result["valid"]:
-                raise FileStorageError(validation_result["error"])
+                raise ValidationError(
+                    validation_result["error"],
+                    details={**upload_context, "validation_result": validation_result},
+                    user_message="The uploaded file is invalid. Please check the file and try again.",
+                    recovery_suggestions=[
+                        "Ensure the file is not corrupted",
+                        "Check that the file size is within limits",
+                        "Verify the file format is supported",
+                        "Try uploading a different file"
+                    ]
+                )
+            
+            upload_context.update({
+                "file_size": validation_result["file_size"],
+                "file_extension": validation_result["file_extension"]
+            })
             
             # Generate safe filename
             safe_filename = self._generate_safe_filename(file.filename, document_id)
             file_path = self.upload_dir / safe_filename
             
-            # Save file
+            upload_context["safe_filename"] = safe_filename
+            upload_context["file_path"] = str(file_path)
+            
+            # Save file with retry logic
             await self._save_file_to_disk(file, file_path)
             
             # Calculate file hash for deduplication
@@ -78,12 +110,28 @@ class FileManager:
                 "created_at": file_stats.st_ctime
             }
             
-            logger.info(f"File saved successfully: {safe_filename} ({file_stats.st_size} bytes)")
+            logger.info("File uploaded successfully", 
+                       file_hash=file_hash[:8],
+                       **upload_context)
+            
             return result
             
+        except (ValidationError, FileStorageError):
+            # Re-raise validation and storage errors with context
+            raise
         except Exception as e:
-            logger.error(f"Failed to save uploaded file: {e}")
-            raise FileStorageError(f"File save failed: {str(e)}")
+            logger.error("File upload failed", error=str(e), **upload_context)
+            raise FileStorageError(
+                f"File save failed: {str(e)}",
+                details=upload_context,
+                user_message="Failed to save the uploaded file. Please try again.",
+                recovery_suggestions=[
+                    "Check if there's sufficient disk space",
+                    "Ensure you have permission to upload files",
+                    "Try uploading the file again",
+                    "Contact support if the problem persists"
+                ]
+            )
     
     async def _validate_upload(self, file: UploadFile) -> Dict[str, Any]:
         """Validate uploaded file."""
@@ -167,20 +215,74 @@ class FileManager:
         
         return f"{name_part}{ext_part}"
     
+    @retry_file_operation("file_save")
     async def _save_file_to_disk(self, file: UploadFile, file_path: Path):
-        """Save file to disk asynchronously."""
+        """Save file to disk asynchronously with retry logic."""
+        save_context = {
+            "file_path": str(file_path),
+            "filename": file.filename
+        }
+        
         try:
+            logger.info("Saving file to disk", **save_context)
+            
+            # Ensure parent directory exists
+            file_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Reset file pointer to beginning
+            await file.seek(0)
+            
             async with aiofiles.open(file_path, 'wb') as f:
                 # Read and write in chunks to handle large files
                 chunk_size = 8192
+                bytes_written = 0
+                
                 while chunk := await file.read(chunk_size):
                     await f.write(chunk)
+                    bytes_written += len(chunk)
+                    
+                    # Log progress for large files
+                    if bytes_written % (1024 * 1024) == 0:  # Every MB
+                        logger.debug("File save progress", 
+                                   bytes_written=bytes_written,
+                                   **save_context)
+            
+            # Verify file was saved correctly
+            if not file_path.exists():
+                raise FileStorageError("File was not saved correctly")
+            
+            saved_size = file_path.stat().st_size
+            if saved_size == 0:
+                raise FileStorageError("Saved file is empty")
+            
+            logger.info("File saved successfully", 
+                       bytes_written=saved_size,
+                       **save_context)
                     
         except Exception as e:
+            logger.error("Failed to save file to disk", error=str(e), **save_context)
+            
             # Clean up partial file if save failed
-            if file_path.exists():
-                file_path.unlink()
-            raise FileStorageError(f"Failed to save file to disk: {str(e)}")
+            try:
+                if file_path.exists():
+                    file_path.unlink()
+                    logger.info("Cleaned up partial file", **save_context)
+            except Exception as cleanup_error:
+                logger.warning("Failed to clean up partial file", 
+                             cleanup_error=str(cleanup_error),
+                             **save_context)
+            
+            raise FileStorageError(
+                f"Failed to save file to disk: {str(e)}",
+                details=save_context,
+                user_message="Failed to save the uploaded file to storage.",
+                recovery_suggestions=[
+                    "Check if there's sufficient disk space",
+                    "Ensure the storage directory is writable",
+                    "Try uploading a smaller file",
+                    "Contact administrator if storage issues persist"
+                ]
+            )
     
     async def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate SHA-256 hash of file for deduplication."""

@@ -17,7 +17,9 @@ from app.models.schemas import (
 from app.services.file_manager import file_manager
 from app.services.document_processor import document_processor
 from app.tasks.document_processing import process_document_task, batch_process_documents_task
-from app.core.exceptions import DocumentProcessingError, FileStorageError
+from app.core.exceptions import DocumentProcessingError, FileStorageError, ValidationError
+from app.core.service_health import service_health_monitor
+from app.core.retry_utils import retry_database_operation
 
 router = APIRouter()
 
@@ -29,7 +31,7 @@ async def upload_document(
     db: Session = Depends(get_db)
 ):
     """
-    Upload and queue document for processing.
+    Upload and queue document for processing with comprehensive error handling.
     
     Args:
         file: Uploaded file
@@ -38,35 +40,75 @@ async def upload_document(
     Returns:
         Document upload response with task information
     """
+    # Generate document ID
+    document_id = str(uuid.uuid4())
+    
+    upload_context = {
+        "document_id": document_id,
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "endpoint": "upload_document"
+    }
+    
     try:
-        # Generate document ID
-        document_id = str(uuid.uuid4())
+        # Check service availability before processing
+        await service_health_monitor.ensure_service_available("storage", "document upload")
+        await service_health_monitor.ensure_service_available("database", "document upload")
+        await service_health_monitor.ensure_service_available("celery", "document upload")
         
         # Save uploaded file
         file_info = await file_manager.save_uploaded_file(file, document_id)
         
-        # Create document record in database
-        document = Document(
-            id=document_id,
-            filename=file_info["original_filename"],
-            safe_filename=file_info["safe_filename"],
-            file_path=file_info["file_path"],
-            file_type=file_info["file_type"],
-            file_size=file_info["file_size"],
-            file_hash=file_info["file_hash"],
-            processing_status="queued"
-        )
+        upload_context.update({
+            "file_size": file_info["file_size"],
+            "file_path": file_info["file_path"]
+        })
         
-        db.add(document)
-        db.commit()
-        db.refresh(document)
+        # Create document record in database with retry
+        @retry_database_operation("document_creation")
+        def create_document_record():
+            document = Document(
+                id=document_id,
+                filename=file_info["original_filename"],
+                file_path=file_info["file_path"],
+                file_type=file_info["file_type"],
+                file_size=file_info["file_size"],
+                processing_status="queued"
+            )
+            
+            db.add(document)
+            db.commit()
+            db.refresh(document)
+            return document
+        
+        document = create_document_record()
         
         # Queue background processing task
-        task = process_document_task.delay(document_id, file_info["file_path"])
-        
-        # Update document with task ID
-        document.task_id = task.id
-        db.commit()
+        try:
+            task = process_document_task.delay(document_id, file_info["file_path"])
+            
+            # Update document with task ID
+            document.task_id = task.id
+            db.commit()
+            
+            upload_context["task_id"] = task.id
+            
+        except Exception as e:
+            # If task queuing fails, update document status
+            document.processing_status = "failed"
+            document.processing_error = f"Failed to queue processing task: {str(e)}"
+            db.commit()
+            
+            raise DocumentProcessingError(
+                f"Failed to queue document processing: {str(e)}",
+                details=upload_context,
+                user_message="Document uploaded but processing could not be started. Please try reprocessing.",
+                recovery_suggestions=[
+                    "Try reprocessing the document from the document list",
+                    "Check if the system is under heavy load",
+                    "Contact support if the issue persists"
+                ]
+            )
         
         return DocumentUpload(
             document_id=document_id,
@@ -75,10 +117,24 @@ async def upload_document(
             message="Document uploaded and queued for processing"
         )
         
-    except FileStorageError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    except (FileStorageError, ValidationError, DocumentProcessingError) as e:
+        # These are already properly formatted PKM exceptions
+        raise HTTPException(status_code=e.status_code, detail=e.to_dict())
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Upload failed: {str(e)}")
+        # Unexpected error
+        raise HTTPException(
+            status_code=500, 
+            detail={
+                "error": "Upload failed due to unexpected error",
+                "message": str(e),
+                "context": upload_context,
+                "suggestions": [
+                    "Try uploading the file again",
+                    "Check if the file is corrupted",
+                    "Contact support if the problem persists"
+                ]
+            }
+        )
 
 
 @router.post("/upload-multiple")
@@ -113,11 +169,9 @@ async def upload_multiple_documents(
                 document = Document(
                     id=document_id,
                     filename=file_info["original_filename"],
-                    safe_filename=file_info["safe_filename"],
                     file_path=file_info["file_path"],
                     file_type=file_info["file_type"],
                     file_size=file_info["file_size"],
-                    file_hash=file_info["file_hash"],
                     processing_status="queued"
                 )
                 
